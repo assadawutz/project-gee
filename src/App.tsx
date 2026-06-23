@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "./components/Header";
+import LandingPage from "./components/LandingPage";
 import FitmentEngine from "./components/FitmentEngine";
 import VirtualFitment from "./components/VirtualFitment";
 import BundleBuilder from "./components/BundleBuilder";
@@ -34,7 +35,8 @@ import {
 
 export default function App() {
   // Navigation
-  const [activeTab, setActiveTab] = useState<string>("fitment");
+  const [activeTab, setActiveTab] = useState<string>("landing");
+  const [wizardStep, setWizardStep] = useState<"fitment" | "virtual" | "bundle">("fitment");
   const [darkTheme, setDarkTheme] = useState<boolean>(true);
 
   // User Auth Mock State
@@ -509,34 +511,61 @@ export default function App() {
               <UserDashboard user={user} onLogout={handleLogout} />
             )}
 
-            {activeTab === "fitment" && (
-              <FitmentEngine
-                products={products}
-                onSelectProductForTryOn={handleSelectProductForTryOn}
-                onAddToCart={handleAddToCart}
-                onAddToComparison={handleAddToComparison}
-                comparisonList={comparisonList}
-                onTrackAction={handleTrackAction}
-                wishlist={wishlist}
-                onToggleWishlist={handleToggleWishlist}
-              />
+            {activeTab === "landing" && (
+              <LandingPage onStart={() => {
+                setActiveTab("wizard");
+                setWizardStep("fitment");
+              }} />
             )}
 
-            {activeTab === "virtual" && (
-              <VirtualFitment
-                selectedVehicle={tryOnVehicle || mockVehicles[0]}
-                selectedWheel={tryOnWheel || mockProducts[0]}
-                selectedTire={tryOnTire || mockProducts.find(p => p.type === 'tire') || mockProducts[0]}
-                onClose={() => setActiveTab("fitment")}
-              />
-            )}
+            {activeTab === "wizard" && (
+              <>
+                {/* Wizard Navigation */}
+                <div className="flex space-x-2 mb-8 justify-center">
+                  {(["fitment", "virtual", "bundle"] as const).map(step => (
+                     <button 
+                       key={step} 
+                       onClick={() => setWizardStep(step)} 
+                       className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${wizardStep === step ? 'bg-[#ccff00] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]' : 'bg-zinc-900 text-zinc-500 hover:text-white'}`}
+                     >
+                       {step}
+                     </button>
+                  ))}
+                </div>
 
-            {activeTab === "bundle" && (
-              <BundleBuilder
-                products={products}
-                onAddBundleToCart={handleAddBundleToCart}
-                onTrackAction={handleTrackAction}
-              />
+                {wizardStep === "fitment" && (
+                  <FitmentEngine
+                    products={products}
+                    onSelectProductForTryOn={(v, w, t) => {
+                      handleSelectProductForTryOn(v, w, t);
+                      setWizardStep("virtual");
+                    }}
+                    onAddToCart={handleAddToCart}
+                    onAddToComparison={handleAddToComparison}
+                    comparisonList={comparisonList}
+                    onTrackAction={handleTrackAction}
+                    wishlist={wishlist}
+                    onToggleWishlist={handleToggleWishlist}
+                  />
+                )}
+
+                {wizardStep === "virtual" && (
+                  <VirtualFitment
+                    selectedVehicle={tryOnVehicle || mockVehicles[0]}
+                    selectedWheel={tryOnWheel || mockProducts[0]}
+                    selectedTire={tryOnTire || mockProducts.find(p => p.type === 'tire') || mockProducts[0]}
+                    onClose={() => setWizardStep("fitment")}
+                  />
+                )}
+
+                {wizardStep === "bundle" && (
+                  <BundleBuilder
+                    products={products}
+                    onAddBundleToCart={handleAddBundleToCart}
+                    onTrackAction={handleTrackAction}
+                  />
+                )}
+              </>
             )}
 
             {activeTab === "booking" && (
