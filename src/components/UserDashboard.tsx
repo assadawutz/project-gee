@@ -161,8 +161,20 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
           <div className="bg-[#0a0a0a]/80 backdrop-blur-md rounded-2xl border border-zinc-800 p-6">
             <h3 className="font-black text-sm uppercase tracking-wider text-white mb-4 flex items-center border-b border-zinc-900 pb-2">
               <Package className="w-4 h-4 text-[#ccff00] mr-2" />
-              ประวัติการสั่งซื้อ (Orders)
+              ติดตามคำสั่งซื้อ (Order Tracker)
             </h3>
+            
+            {/* Visual Timeline Tracker */}
+            <div className="flex justify-between items-center mb-8 px-2">
+              {['Processing', 'Preparing', 'Shipping', 'Delivered'].map((step, i) => (
+                <div key={step} className="flex flex-col items-center space-y-2">
+                   <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${i <= 1 ? 'bg-[#ccff00] border-[#ccff00] text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
+                      {i <= 1 ? <ShieldCheck className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-zinc-700" />}
+                   </div>
+                   <span className="text-[8px] font-black uppercase text-zinc-500">{step}</span>
+                </div>
+              ))}
+            </div>
 
             {user.orders.length > 0 ? (
               <div className="space-y-4">
@@ -283,12 +295,17 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
             )}
           </div>
 
-          {/* Booking History */}
+            {/* Booking History */}
           <div className="bg-[#0a0a0a]/80 backdrop-blur-md rounded-2xl border border-zinc-800 p-6">
             <h3 className="font-black text-sm uppercase tracking-wider text-white mb-4 flex items-center border-b border-zinc-900 pb-2">
               <Calendar className="w-4 h-4 text-[#ccff00] mr-2" />
-              คิวเข้ารับบริการ (Bookings)
+              ประวัติการบริการ (Service History)
             </h3>
+            
+            <div className="bg-zinc-900/40 border border-zinc-800 p-4 rounded-2xl mb-6">
+               <p className="text-xs text-zinc-400 mb-4">นัดหมายเข้ารับบริการรอบถัดไปเพื่อตรวจเช็คสภาพช่วงล่างและระบบล้อ</p>
+               <button className="w-full py-3 bg-[#ccff00] text-black font-black uppercase text-xs rounded-xl">จองคิวบริการถัดไป</button>
+            </div>
 
             {user.bookings.length > 0 ? (
               <div className="space-y-4">

@@ -47,9 +47,26 @@ export default function VirtualFitment({
   const [activeTab, setActiveTab] = useState<"stance" | "color" | "photo">("stance");
 
   // Interaction States
-  const [isCalibrating, setIsCalibrating] = useState(false);
-  const [frontPos, setFrontPos] = useState(config.frontWheel);
-  const [rearPos, setRearPos] = useState(config.rearWheel);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleCamera = async () => {
+    if (!isCameraActive) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setIsCameraActive(true);
+        }
+      } catch (err) {
+        console.error("Error accessing camera: ", err);
+      }
+    } else {
+      const stream = videoRef.current?.srcObject as MediaStream;
+      stream?.getTracks().forEach(track => track.stop());
+      setIsCameraActive(false);
+    }
+  };
 
   useEffect(() => {
     setFrontPos(config.frontWheel);
@@ -153,12 +170,28 @@ export default function VirtualFitment({
 
         <div className="absolute top-6 right-6 z-40 flex space-x-3">
           <button
+            onClick={toggleCamera}
+            className={`h-10 px-4 backdrop-blur-md border text-[11px] font-black uppercase rounded-xl transition-all flex items-center space-x-2 ${isCameraActive ? 'bg-rose-500/20 border-rose-500 text-rose-500' : 'bg-zinc-900/80 border-zinc-800 text-white'}`}
+          >
+            <Camera className="w-4 h-4" />
+            <span>{isCameraActive ? 'Disable AR' : 'Enable AR Camera'}</span>
+          </button>
+          <button
             onClick={onClose}
             className="h-10 px-4 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 text-white text-[11px] font-black uppercase rounded-xl hover:bg-zinc-800 transition-all flex items-center space-x-2"
           >
             <span>Exit Session</span>
           </button>
         </div>
+        
+        {isCameraActive && (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="absolute inset-0 z-10 w-full h-full object-cover"
+          />
+        )}
 
         {/* RENDER STAGE */}
         <div className="relative flex-1 flex items-center justify-center p-2 sm:p-6 lg:p-12">
