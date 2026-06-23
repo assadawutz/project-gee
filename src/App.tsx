@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Header from "./components/Header";
-import LandingPage from "./components/LandingPage";
+import Navigation from "./components/Navigation";
+import Landing from "./components/Landing";
 import FitmentEngine from "./components/FitmentEngine";
 import VirtualFitment from "./components/VirtualFitment";
 import BookingCalendar from "./components/BookingCalendar";
@@ -479,22 +479,10 @@ export default function App() {
     <div
       className={`min-h-screen font-sans bg-carbon ${darkTheme ? "dark text-zinc-100" : "light bg-zinc-50 text-zinc-900"} transition-colors duration-300`}
     >
-      {/* Global Mega Menu Header */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        darkTheme={darkTheme}
-        setDarkTheme={setDarkTheme}
-        cart={cart}
-        clearCart={() => setCart([])}
-        comparisonList={comparisonList}
-        openComparison={() => setCompOpen(true)}
-        triggerCheckout={() => {
-          setCheckoutStep(1);
-          setCheckoutOpen(true);
-        }}
-        onTrackAction={handleTrackAction}
-        user={user}
+      <Navigation 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        user={user} 
         onLoginClick={() => setIsLoginModalOpen(true)}
       />
 
@@ -508,7 +496,7 @@ export default function App() {
             )}
 
             {activeTab === "landing" && (
-              <LandingPage onStart={() => {
+              <Landing onStart={() => {
                 setActiveTab("wizard");
                 setWizardStep("fitment");
               }} />
