@@ -478,11 +478,8 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen font-sans ${darkTheme ? "dark bg-[#0a0a0a] text-zinc-100" : "light bg-zinc-50 text-zinc-900"} transition-colors duration-300`}
+      className={`min-h-screen font-sans bg-carbon ${darkTheme ? "dark text-zinc-100" : "light bg-zinc-50 text-zinc-900"} transition-colors duration-300`}
     >
-      {/* Carbon fiber grid style layer */}
-      <div className="pointer-events-none fixed inset-0 opacity-[0.03] bg-[radial-gradient(#ccff00_1px,transparent_1px)] [background-size:24px_24px] z-0"></div>
-
       {/* Global Mega Menu Header */}
       <Header
         activeTab={activeTab}

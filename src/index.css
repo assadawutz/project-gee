@@ -13,6 +13,17 @@
   .rotate-y-180 {
     transform: rotateY(180deg);
   }
+  .bg-carbon {
+    background-image: radial-gradient(circle at 2px 2px, #1a1a1a 1px, transparent 0);
+    background-size: 24px 24px;
+    background-color: #070707;
+    animation: moveCarbon 20s linear infinite;
+  }
+}
+
+@keyframes moveCarbon {
+  0% { background-position: 0 0; }
+  100% { background-position: 24px 24px; }
 }
 
 @keyframes fadeIn {
