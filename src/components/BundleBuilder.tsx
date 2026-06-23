@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { mockProducts } from '../data/mockData';
-import { Sparkles, HelpCircle, Package, ArrowRight, ShieldCheck, CheckSquare, Coins, BadgePercent } from 'lucide-react';
+import { Sparkles, HelpCircle, Package, ArrowRight, ShieldCheck, CheckSquare, Coins, BadgePercent, FileText } from 'lucide-react';
 
 interface BundleBuilderProps {
   products: Product[];
@@ -44,6 +44,194 @@ export default function BundleBuilder({
   const handleAddBundle = () => {
     onAddBundleToCart(selectedWheel, selectedTire, quantity, finalDiscount);
     onTrackAction('bundleBuilds');
+  };
+
+  const exportToPDFInvoice = async () => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      // Styles & Palette
+      const primaryColor = '#111111';
+      const accentColor = '#ddff00';
+
+      // 1. Sleek Dark Header Banner
+      doc.setFillColor(17, 17, 17);
+      doc.rect(0, 0, 210, 38, 'F');
+
+      // Brand Title
+      doc.setTextColor(221, 255, 0); // Neon Lime
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text('GEE BUNDLE SAVER', 15, 16);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.text('CO., LTD. - BANGKOK RACING GARAGE', 15, 22);
+      doc.text('HIGH-PERFORMANCE WHEEL & TIRE COMBINATION QUOTE', 15, 27);
+
+      // Metajet Info (Right side)
+      doc.setTextColor(200, 200, 200);
+      doc.setFontSize(8);
+      doc.text('DOCUMENT NO: GEE-BUN-2026-4411', 140, 15);
+      const currentTime = new Date().toLocaleString();
+      doc.text(`ISSUED DATE: ${currentTime}`, 140, 20);
+      doc.text('VALUATION: OFFICIAL BUNDLE ESTIMATE', 140, 25);
+      doc.text('STATUS: COMBO DISCOUNT VERIFIED', 140, 30);
+
+      // Neon Split Line
+      doc.setDrawColor(221, 255, 0);
+      doc.setLineWidth(1);
+      doc.line(0, 38, 210, 38);
+
+      // SECTION 1: CUSTOM BUNDLE SUMMARY
+      doc.setTextColor(17, 17, 17);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('1. SELECTED WHEEL & TIRE SUMMARY', 15, 52);
+
+      // Background info card
+      doc.setFillColor(245, 245, 247);
+      doc.rect(15, 56, 180, 52, 'F');
+      doc.setDrawColor(220, 220, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(15, 56, 180, 52);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(50, 50, 50);
+
+      doc.text('Selected Wheel (ล้อแม็กซ์):', 20, 64);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${selectedWheel.brand} ${selectedWheel.name} (R${selectedWheel.size})`, 75, 64);
+      
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Selected Tire (ยางซิ่ง):', 20, 71);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${selectedTire.brand} ${selectedTire.name} (Spec fit: ${selectedTire.tireWidth}/${selectedTire.tireAspect} R${selectedTire.tireSizeCompat})`, 75, 71);
+
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Combination Compatibility:', 20, 78);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(sizeCompatMsg.ok ? 'COMPATIBLE (ติดตั้งเข้าคู่สำเร็จ 100%)' : 'WARNING (ขอบยางล้อไม่สอดคล้อง)', 75, 78);
+      doc.setFont('Helvetica', 'normal');
+      doc.setTextColor(50, 50, 50);
+
+      doc.text('Bundle Quantity (จำนวน):', 20, 85);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${quantity} wheels and ${quantity} tires`, 75, 85);
+
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Target Hub Bolt Pattern:', 20, 92);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`JDM Standard Match Hub CB ${selectedWheel.cbCompat || '73.1'}`, 75, 92);
+
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Guarantee / Warranty:', 20, 99);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('GEE RACING 3-YEAR COMPONENT WARRANTY', 75, 99);
+
+      // SECTION 2: COST ESTIMATE CALCULATIONS
+      doc.setTextColor(17, 17, 17);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('2. COST ESTIMATE CALCULATIONS & DISCOUNT PLAN', 15, 122);
+
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, 126, 180, 54, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(15, 126, 180, 54);
+
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('BILLING DESCRIPTION', 20, 134);
+      doc.text('SPECIFICATIONS & VALUE', 75, 134);
+      doc.text('QTY', 145, 134);
+      doc.text('UNIT PRICE', 165, 134);
+
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, 138, 195, 138);
+
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 30, 30);
+
+      // Wheels
+      doc.text(`${selectedWheel.brand} Wheels Set`, 20, 144);
+      doc.text(`Width ${selectedWheel.width}J Offset +${selectedWheel.offset} JDM Spec`, 75, 144);
+      doc.text(`x ${quantity}`, 145, 144);
+      doc.text(`${selectedWheel.price.toLocaleString()} THB`, 165, 144);
+
+      // Tires
+      doc.text(`${selectedTire.brand} Performance Tires`, 20, 151);
+      doc.text(`Speed Compound rating: ${selectedTire.speedRating || 'Y'}`, 75, 151);
+      doc.text(`x ${quantity}`, 145, 151);
+      doc.text(`${selectedTire.price.toLocaleString()} THB`, 165, 151);
+
+      // Mounting & Installation
+      doc.text('Mounting & Wheel Balancing', 20, 158);
+      doc.text('Wheel-alignment diagnostics set', 75, 158);
+      doc.text('1 Set', 145, 158);
+      doc.text('Free gift', 165, 158);
+
+      doc.line(15, 163, 195, 163);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setTextColor(80, 80, 80);
+      doc.text(`Pre-discount Subtotal:`, 110, 168);
+      doc.text(`${rawSubTotal.toLocaleString()} THB`, 165, 168);
+
+      doc.setTextColor(220, 50, 50);
+      doc.text(`Combo Discount (10%):`, 110, 172);
+      doc.text(`- ${tenPercentOff.toLocaleString()} THB`, 165, 172);
+
+      if (loyaltyBonus > 0) {
+        doc.text(`Loyalty Set Bonus:`, 110, 176);
+        doc.text(`- ${loyaltyBonus.toLocaleString()} THB`, 165, 176);
+      }
+
+      // Dark Box Total Highlight
+      doc.setFillColor(17, 17, 17);
+      doc.rect(110, 182, 85, 10, 'F');
+      doc.setTextColor(221, 255, 0);
+      doc.setFontSize(10);
+      doc.text(`NET COMBO PRICE:`, 113, 188.5);
+      doc.text(`${finalPayAmount.toLocaleString()} THB`, 155, 188.5);
+
+      // Footnotes
+      doc.setTextColor(110, 110, 115);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.text(`* Optional Installment Plan: (ดอกเบี้ย 0% x 6เดือน) = ตกเพียงเดือนละ ${(finalPayAmount / 6).toFixed(0).toLocaleString()} THB / เดือน เท่านั้น`, 15, 195);
+
+      // Layout divider and terms
+      doc.setDrawColor(220, 220, 225);
+      doc.setLineWidth(0.3);
+      doc.line(15, 230, 195, 230);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('TERMS & CONDITIONS (เงื่อนไขและข้อตกลง):', 15, 236);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.text('1. Pre-sale quotes are matching standard car sizes. Valid for immediate fit-check at showroom.', 15, 240);
+      doc.text('2. Combo includes free metal valve stem cores, lifetime nitrogen top-up at our Bangkok workshop.', 15, 243);
+      doc.text('3. GEE RACER guarantee covers 100% paint chipping & forging integrity under professional street.', 15, 246);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('GEE GARAGE REPRESENTATIVE', 140, 236);
+      doc.line(140, 248, 190, 248);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Authorized Signature & Official Stamp', 140, 251);
+
+      doc.save(`GEE_COMBO_QUOTE_${selectedWheel.brand}_${selectedWheel.name}.pdf`);
+      onTrackAction('pdfQuoteExports');
+    } catch (e) {
+      console.error("PDF combination quote export failed: ", e);
+    }
   };
 
   return (
@@ -250,9 +438,19 @@ export default function BundleBuilder({
             <button
               onClick={handleAddBundle}
               disabled={!sizeCompatMsg.ok}
-              className="w-full py-3 bg-[#ccff00] text-[#0a0a0a] rounded-xl font-sans font-black text-xs uppercase tracking-wider text-center hover:bg-lime-400 disabled:opacity-40 disabled:cursor-not-allowed duration-300"
+              className="w-full py-3 bg-[#ccff00] text-[#0a0a0a] rounded-xl font-sans font-black text-xs uppercase tracking-wider text-center hover:bg-lime-400 disabled:opacity-40 disabled:cursor-not-allowed duration-300 cursor-pointer"
             >
               หยิบชุดเซตลงตะกร้าทันที!
+            </button>
+
+            {/* Custom Interactive PDF Exporter for combination quote */}
+            <button
+              onClick={exportToPDFInvoice}
+              className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white rounded-xl text-xs font-black uppercase text-center transition-all hover:border-[#ccff00] hover:text-[#ccff00] flex items-center justify-center space-x-2 cursor-pointer"
+              title="ส่งออกเอกสารใบเสนอราคาเซตโปรโมชั่นล้อบวกยางคุณภาพสูง (PDF Quote)"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#ccff00]" />
+              <span>ส่งออกใบเสนอราคาเซต PDF (EN/TH)</span>
             </button>
           </div>
 

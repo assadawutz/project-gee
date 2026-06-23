@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Vehicle, Product } from '../types';
 import { mockVehicles, mockProducts } from '../data/mockData';
-import { Paintbrush, Sliders, ToggleLeft, Disc, Sparkles, AlertCircle } from 'lucide-react';
+import { Paintbrush, Sliders, ToggleLeft, Disc, Sparkles, AlertCircle, FileText, Download } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 interface VirtualFitmentProps {
   initialVehicle?: Vehicle | null;
@@ -41,6 +42,347 @@ export default function VirtualFitment({
   const [tireStretch, setTireStretch] = useState<'normal' | 'aggressive' | 'slick'>('aggressive');
   const [activeTabPanel, setActiveTabPanel] = useState<'body' | 'alignment' | 'wheel'>('body');
 
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Handle responsive sizing
+    const width = canvas.offsetWidth || 600;
+    const height = canvas.offsetHeight || 384;
+    canvas.width = width;
+    canvas.height = height;
+
+    // Clear everything
+    ctx.clearRect(0, 0, width, height);
+
+    // Grid Lines (Aesthetic CAD telemetry background)
+    ctx.strokeStyle = 'rgba(204, 255, 0, 0.05)';
+    ctx.lineWidth = 1;
+    for (let i = 20; i < width; i += 30) {
+      ctx.beginPath();
+      ctx.moveTo(i, 0);
+      ctx.lineTo(i, height);
+      ctx.stroke();
+    }
+    for (let j = 20; j < height; j += 30) {
+      ctx.beginPath();
+      ctx.moveTo(0, j);
+      ctx.lineTo(width, j);
+      ctx.stroke();
+    }
+
+    // Laser Tracker Line (Static Horizontal Centerline)
+    ctx.strokeStyle = '#ccff00';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.setLineDash([6, 4]);
+    ctx.moveTo(40, height - 85);
+    ctx.lineTo(width - 40, height - 85);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw Alignment Sensors / Red dot lasers
+    const frontWheelX = 145; // Front Wheel approx center
+    const rearWheelX = width - 150; // Rear Wheel approx center
+    const wheelY = height - 105; // Ground level height
+
+    // Suspension car relative delta position
+    const carY = height - 160 + (suspensionGap / 2);
+
+    // Front sensor vector line
+    ctx.strokeStyle = '#ccff00';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(frontWheelX, wheelY, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#ccff00';
+    ctx.fill();
+
+    // Draw Front Angle Ticks
+    ctx.beginPath();
+    ctx.moveTo(frontWheelX, wheelY);
+    // Draw vector pointing down aligned with camber angle
+    const frontCamberX = frontWheelX + Math.sin(camberAngle * Math.PI / 180) * 45;
+    const frontCamberY = wheelY + 45;
+    ctx.lineTo(frontCamberX, frontCamberY);
+    ctx.strokeStyle = 'rgba(204, 255, 0, 0.7)';
+    ctx.stroke();
+
+    // Rear sensor vector line
+    ctx.beginPath();
+    ctx.arc(rearWheelX, wheelY, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(rearWheelX, wheelY);
+    const rearCamberX = rearWheelX + Math.sin(camberAngle * Math.PI / 180) * 45;
+    const rearCamberY = wheelY + 45;
+    ctx.lineTo(rearCamberX, rearCamberY);
+    ctx.stroke();
+
+    // Write text overlays directly on the canvas
+    ctx.font = 'bold 9px monospace';
+    ctx.fillStyle = '#ccff00';
+    ctx.fillText(`CAMBER LH: ${camberAngle.toFixed(1)}°`, frontWheelX - 42, wheelY - 50);
+    ctx.fillText(`CAMBER RH: ${camberAngle.toFixed(1)}°`, rearWheelX - 42, wheelY - 50);
+
+    // Draw Height clearance laser pointer (glowing red line)
+    ctx.strokeStyle = '#f43f5e'; // rose-500 red laser
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(frontWheelX, carY + 30);
+    ctx.lineTo(frontWheelX, wheelY);
+    ctx.stroke();
+
+    ctx.fillStyle = '#f43f5e';
+    ctx.fillText(`GAP: ${(70 - suspensionGap).toFixed(0)}mm`, frontWheelX + 8, (carY + 30 + wheelY) / 2);
+
+    ctx.strokeStyle = '#f43f5e';
+    ctx.beginPath();
+    ctx.moveTo(rearWheelX, carY + 30);
+    ctx.lineTo(rearWheelX, wheelY);
+    ctx.stroke();
+
+    ctx.fillStyle = '#f43f5e';
+    ctx.fillText(`GAP: ${(70 - suspensionGap).toFixed(0)}mm`, rearWheelX + 8, (carY + 30 + wheelY) / 2);
+
+  }, [suspensionGap, camberAngle, wheelSizeScale, carColor]);
+
+  const exportToPDFInvoice = () => {
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4');
+
+      // Styles & Palette
+      const primaryColor = '#111111';
+      const accentColor = '#ddff00'; 
+      const grayColor = '#666666';
+
+      // 1. Sleek Dark Header Banner
+      doc.setFillColor(17, 17, 17);
+      doc.rect(0, 0, 210, 38, 'F');
+
+      // Brand Title
+      doc.setTextColor(221, 255, 0); // Neon Lime
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text('GEE FITMENT ENGINE', 15, 16);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.text('CO., LTD. - BANGKOK RACING GARAGE', 15, 22);
+      doc.text('HIGH-PERFORMANCE CUSTOMS & WHEEL DESIGN', 15, 27);
+
+      // Metajet Info (Right side)
+      doc.setTextColor(200, 200, 200);
+      doc.setFontSize(8);
+      doc.text('DOCUMENT NO: GEE-FIT-2026-8809', 140, 15);
+      const currentTime = new Date().toLocaleString();
+      doc.text(`ISSUED DATE: ${currentTime}`, 140, 20);
+      doc.text('VALUATION: OFFICIAL QUOTATION', 140, 25);
+      doc.text('STATUS: VERIFIED DIRECT COMPATIBLE', 140, 30);
+
+      // Neon Split Line
+      doc.setDrawColor(221, 255, 0);
+      doc.setLineWidth(1);
+      doc.line(0, 38, 210, 38);
+
+      // SECTION 1: Vehicle Customization Specifications
+      doc.setTextColor(17, 17, 17);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('1. VEHICLE SETUP & CUSTOM CONFIGURATION', 15, 52);
+
+      // Background card
+      doc.setFillColor(245, 245, 247);
+      doc.rect(15, 56, 180, 42, 'F');
+      doc.setDrawColor(220, 220, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(15, 56, 180, 42);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text('SPECIFICATION PARAMETER', 20, 63);
+      doc.text('VALUE', 105, 63);
+      doc.text('FITMENT ENGINE TELEMETRY STATUS', 145, 63);
+
+      doc.setDrawColor(200, 200, 205);
+      doc.line(15, 66, 195, 66);
+
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(50, 50, 50);
+
+      doc.text('Target Vehicle (รุ่นรถเป้าหมาย):', 20, 71);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.year})`, 105, 71);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('COMPATIBLE', 145, 71);
+
+      doc.text('Bolt Pattern / PCD Info (สเปกรูน็อต):', 20, 76);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${selectedVehicle.pcd} / CB ${selectedVehicle.cb}`, 105, 76);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('PCD MATCHED', 145, 76);
+
+      doc.text('Camber Angle Offset (มุมแคมเบอร์):', 20, 81);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${camberAngle.toFixed(1)} degrees`, 105, 81);
+      doc.setFont('Helvetica', 'normal');
+      doc.text(camberAngle < -3 ? 'STANCE INCLINED (เต้าแคมเบอร์เอียงพิเศษ)' : 'TRACK STANDARD', 145, 81);
+
+      doc.text('Suspension Gap Clearance (ความสูงโช้ก):', 20, 86);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${(70 - suspensionGap).toFixed(0)} mm drop`, 105, 86);
+      doc.setFont('Helvetica', 'normal');
+      doc.text(suspensionGap > 45 ? 'AGGRESSIVE FLUSH (โหลดเตี้ยสุดชิค)' : 'SPORT STREET', 145, 86);
+
+      doc.text('Custom Body Paint Hex (สีตัวถังรถ):', 20, 91);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${carColor.toUpperCase()}`, 105, 91);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('FINISH READY', 145, 91);
+
+      // Painted Circle display beside Hex value
+      doc.setFillColor(carColor);
+      doc.setDrawColor(0,0,0);
+      doc.circle(138, 90, 2.5, 'FD');
+
+      // SECTION 2: CAD Line Laser-Track Telemetry (Canvas Capture)
+      doc.setTextColor(17, 17, 17);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('2. LASER-TRACK ALIGNMENT SENSORS (CAD VIEW)', 15, 110);
+
+      const canvas = canvasRef.current;
+      if (canvas) {
+        try {
+          const imgData = canvas.toDataURL('image/png');
+          // Solid background padding for contrast standard
+          doc.setFillColor(15, 15, 15);
+          doc.rect(15, 114, 180, 52, 'F');
+          doc.setDrawColor(32, 32, 32);
+          doc.rect(15, 114, 180, 52);
+
+          doc.addImage(imgData, 'PNG', 16, 115, 178, 50, undefined, 'FAST');
+        } catch (e) {
+          console.error("Canvas export failed fallback display: ", e);
+          doc.setFillColor(240, 240, 240);
+          doc.rect(15, 114, 180, 52, 'F');
+          doc.setTextColor(150, 150, 150);
+          doc.setFontSize(9);
+          doc.text('SVG ALIGNMENT SENSORS GENERATED PREVIEW MATCH', 40, 140);
+        }
+      }
+
+      // SECTION 3: Cost and Package breakdown spec
+      doc.setTextColor(17, 17, 17);
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('3. DETAILED PRODUCT SPECIFICATION & BUNDLE COST', 15, 178);
+
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, 182, 180, 48, 'F');
+      doc.setDrawColor(226, 232, 240);
+      doc.rect(15, 182, 180, 48);
+
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('Helvetica', 'bold');
+      doc.text('ITEMIZED COMPONENT', 20, 190);
+      doc.text('SPECIFICATIONS', 70, 190);
+      doc.text('QTY', 145, 190);
+      doc.text('UNIT PRICE', 165, 190);
+
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, 194, 195, 194);
+
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(30, 30, 30);
+
+      doc.text(`${selectedWheel.brand} ${selectedWheel.name}`, 20, 201);
+      doc.text(`${selectedWheel.size}'' x ${selectedWheel.width}J | ET+${selectedWheel.offset} | ${selectedWheel.color}`, 70, 201);
+      doc.text('4 Unit', 145, 201);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`${selectedWheel.price.toLocaleString()} THB`, 165, 201);
+      doc.setFont('Helvetica', 'normal');
+
+      doc.text(`Tire Stretch Compound`, 20, 208);
+      doc.text(`${tireStretch.toUpperCase()} PROFILE - High Performance Rubber Compound`, 70, 208);
+      doc.text('4 Unit', 145, 208);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`Included (0 THB)`, 165, 208);
+      doc.setFont('Helvetica', 'normal');
+
+      doc.text(`Nitrogen Air & Balancing`, 20, 215);
+      doc.text(`Precision Weight balancing & high purity nitrogen gas purge`, 70, 215);
+      doc.text('1 Set', 145, 215);
+      doc.setFont('Helvetica', 'bold');
+      doc.text(`Free gift`, 165, 215);
+      doc.setFont('Helvetica', 'normal');
+
+      doc.line(15, 219, 195, 219);
+
+      const totalAmountVal = selectedWheel.price * 4;
+      const discountVal = 2500; // Special quota promo discount
+      const finalVal = totalAmountVal - discountVal;
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setTextColor(80, 80, 80);
+      doc.text(`Subtotal Wheels Set:`, 110, 224);
+      doc.text(`${totalAmountVal.toLocaleString()} THB`, 165, 224);
+
+      doc.setTextColor(220, 50, 50);
+      doc.text(`Street Bundle Promo Discount (ส่วนลด):`, 110, 228);
+      doc.text(`- ${discountVal.toLocaleString()} THB`, 165, 228);
+
+      // Dark Box Total Highlights
+      doc.setFillColor(17, 17, 17);
+      doc.rect(110, 232, 85, 10, 'F');
+      doc.setTextColor(221, 255, 0); 
+      doc.setFontSize(10);
+      doc.text(`NET ESTIMATE AMOUNT:`, 113, 238.5);
+      doc.text(`${finalVal.toLocaleString()} THB`, 155, 238.5);
+
+      // Footnotes
+      doc.setTextColor(110, 110, 115);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.text(`* Optional Installment Plan: (ดอกเบี้ย 0% x 6เดือน) = ตกเพียงเดือนละ ${(finalVal / 6).toFixed(0).toLocaleString()} THB / เดือน เท่านั้น`, 15, 242);
+
+      // Divider and official stamps
+      doc.setDrawColor(220, 220, 225);
+      doc.setLineWidth(0.3);
+      doc.line(15, 260, 195, 260);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('TERMS & CONDITIONS (เงื่อนไขและข้อตกลง):', 15, 266);
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.text('1. This quotation is generated based on real-time street database matching and valid for 30 days.', 15, 270);
+      doc.text('2. Physical installation includes professional laser alignment, balanced balancing and custom wheel cap fittings.', 15, 273);
+      doc.text('3. GEE RACER guarantee covers 100% paint chipping & forging integrity under professional street and racetrack usage.', 15, 276);
+
+      doc.setFont('Helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text('GEE GARAGE REPRESENTATIVE', 140, 266);
+      doc.line(140, 278, 190, 278);
+      doc.setFont('Helvetica', 'normal');
+      doc.text('Authorized Signature & Official Stamp', 140, 281);
+
+      doc.save(`GEE_FITMENT_QUOTE_${selectedVehicle.brand}_${selectedVehicle.model}.pdf`);
+      onTrackAction('pdfQuoteExports');
+    } catch (err) {
+      console.error("PDF quotation export failed: ", err);
+    }
+  };
+
   const wheelsList = mockProducts.filter((p) => p.type === 'wheel');
 
   // Paint color palette presets
@@ -74,6 +416,12 @@ export default function VirtualFitment({
           
           <div className="relative w-full h-80 sm:h-96 rounded-2xl bg-zinc-950/80 border border-zinc-800 p-6 overflow-hidden flex items-center justify-center select-none shadow-inner">
             
+            {/* HTML5 Interactive Alignment Canvas */}
+            <canvas 
+              ref={canvasRef} 
+              className="absolute inset-0 w-full h-full pointer-events-none z-10"
+            />
+
             {/* Grid Pattern overlay for true garage feel */}
             <div className="absolute inset-0 bg-[radial-gradient(#222_1px,transparent_1px)] [background-size:16px_16px]"></div>
             <div className="absolute bottom-16 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#ccff00]/30 to-transparent"></div>
@@ -396,9 +744,19 @@ export default function VirtualFitment({
                 onAddToCart(selectedWheel);
                 onTrackAction('stripeCheckoutClicks');
               }}
-              className="w-full py-3 bg-[#ccff00] text-[#0a0a0a] rounded-xl font-sans font-black text-xs uppercase tracking-wider text-center hover:bg-lime-400 duration-300"
+              className="w-full py-3 bg-[#ccff00] text-[#0a0a0a] rounded-xl font-sans font-black text-xs uppercase tracking-wider text-center hover:bg-lime-400 duration-300 cursor-pointer"
             >
               ตกลง เอาชุดล้อ {selectedWheel.brand} นี้!
+            </button>
+
+            {/* Custom Interactive PDF Screenshot-to-Invoice Exporter button */}
+            <button
+              onClick={exportToPDFInvoice}
+              className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white rounded-xl text-xs font-black uppercase text-center transition-all hover:border-[#ccff00] hover:text-[#ccff00] flex items-center justify-center space-x-2 cursor-pointer"
+              title="เซฟภาพ CAD Canvas และรายละเอียดส่งออกแบบฟอร์มใบเสนอราคาระดับพรีเมียม (PDF)"
+            >
+              <FileText className="w-3.5 h-3.5 text-[#ccff00]" />
+              <span>ส่งออกใบเสนอราคา PDF (EN/TH)</span>
             </button>
 
           </div>

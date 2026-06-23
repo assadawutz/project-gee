@@ -8,12 +8,44 @@ import ComparisonDrawer from './components/ComparisonDrawer';
 import AdminDashboard from './components/AdminDashboard';
 import AIChat from './components/AIChat';
 import { Product, Vehicle, Booking, Order, OrderItem } from './types';
-import { CreditCard, Eye, Sparkles, CheckCircle2, ShieldCheck, ShoppingCart, Sliders, AlertTriangle } from 'lucide-react';
+import { CreditCard, Eye, Sparkles, CheckCircle2, ShieldCheck, ShoppingCart, Sliders, AlertTriangle, Heart, Bell, Mail } from 'lucide-react';
 
 export default function App() {
   // Navigation
   const [activeTab, setActiveTab] = useState<string>('fitment');
   const [darkTheme, setDarkTheme] = useState<boolean>(true);
+
+  // Favorites/Wishlist state persisted to local storage
+  const [wishlist, setWishlist] = useState<Product[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gee_wishlist');
+      try {
+        return saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Out of stock subscription states
+  const [backInStockProduct, setBackInStockProduct] = useState<Product | null>(null);
+  const [subscriptionEmail, setSubscriptionEmail] = useState<string>('');
+
+  useEffect(() => {
+    localStorage.setItem('gee_wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  const handleToggleWishlist = (product: Product) => {
+    if (wishlist.some((item) => item.id === product.id)) {
+      setWishlist(wishlist.filter((item) => item.id !== product.id));
+      showToast(`นำ ${product.name} ออกจากวิชลิสต์โปรดของพี่แล้วครับ`, "info");
+    } else {
+      setWishlist([...wishlist, product]);
+      showToast(`บันทึก ${product.name} ลงในรายการโปรดเรียบร้อยครับ!`, "success");
+    }
+    handleTrackAction('wishlistToggles');
+  };
 
   // Custom premium Toast Notification state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'warn' | 'error' | 'info' } | null>(null);
@@ -104,6 +136,11 @@ export default function App() {
 
   // Cart operations
   const handleAddToCart = (product: Product) => {
+    if (product.stock === 0) {
+      setBackInStockProduct(product);
+      showToast(`สินค้า ${product.name} หมดชั่วคราวครับ เปิดฟอร์มลงชื่อรับการแจ้งเตือนเมื่อของเข้าเรียบร้อยครับ!`, "warn");
+      return;
+    }
     const exists = cart.find((item) => item.product.id === product.id);
     if (exists) {
       setCart(
@@ -190,6 +227,40 @@ export default function App() {
     handleTrackAction('virtualTries');
   };
 
+  // Back in stock alerts subscribe handler
+  const handleSubscribeBackInStock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subscriptionEmail || !backInStockProduct) return;
+    
+    // Read previous alerts
+    const savedAlerts = localStorage.getItem('gee_back_in_stock_alerts');
+    let alerts = [];
+    try {
+      alerts = savedAlerts ? JSON.parse(savedAlerts) : [];
+    } catch (err) {
+      alerts = [];
+    }
+    
+    // Check if duplicate
+    const isDuplicate = alerts.some((a: any) => a.email === subscriptionEmail && a.productId === backInStockProduct.id);
+    if (!isDuplicate) {
+      alerts.push({
+        id: 'alert_' + Date.now(),
+        email: subscriptionEmail,
+        productId: backInStockProduct.id,
+        productName: backInStockProduct.name,
+        productBrand: backInStockProduct.brand,
+        productImage: backInStockProduct.image,
+        timestamp: new Date().toLocaleDateString('th-TH') + ' ' + new Date().toLocaleTimeString('th-TH')
+      });
+      localStorage.setItem('gee_back_in_stock_alerts', JSON.stringify(alerts));
+    }
+    
+    showToast(`ลงทะเบียนรับการแจ้งเตือน ${backInStockProduct.name} สำเร็จ! เราจะส่งเมลหาเมื่อสต็อกมีในหลังร้านครับ`, "success");
+    setBackInStockProduct(null);
+    setSubscriptionEmail('');
+  };
+
   // Simulated Stripe payment gateway checkout
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,7 +304,7 @@ export default function App() {
   const netCheckoutAmount = totalCartPrice - totalCartDiscount;
 
   return (
-    <div className={`min-h-screen font-sans ${darkTheme ? 'bg-[#0a0a0a] text-zinc-100' : 'bg-zinc-50 text-zinc-900'} transition-colors duration-300`}>
+    <div className={`min-h-screen font-sans ${darkTheme ? 'dark bg-[#0a0a0a] text-zinc-100' : 'light bg-zinc-50 text-zinc-900'} transition-colors duration-300`}>
       
       {/* Carbon fiber grid style layer */}
       <div className="pointer-events-none fixed inset-0 opacity-[0.03] bg-[radial-gradient(#ccff00_1px,transparent_1px)] [background-size:24px_24px] z-0"></div>
@@ -266,6 +337,8 @@ export default function App() {
                 onAddToComparison={handleAddToComparison}
                 comparisonList={comparisonList}
                 onTrackAction={handleTrackAction}
+                wishlist={wishlist}
+                onToggleWishlist={handleToggleWishlist}
               />
             )}
 
@@ -498,6 +571,64 @@ export default function App() {
               </div>
             )}
 
+          </div>
+        </div>
+      )}
+
+      {/* Back in stock subscription alerts modal */}
+      {backInStockProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="relative w-full max-w-sm rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-6 shadow-2xl text-white space-y-4 text-left">
+            <button 
+              onClick={() => setBackInStockProduct(null)} 
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
+            >
+              ✕
+            </button>
+            <div className="text-center font-sans">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-500/10 mb-3 border border-amber-500/30">
+                <Bell className="w-6 h-6 text-[#ccff00]" />
+              </div>
+              <span className="text-[10px] uppercase font-black text-[#ccff00] tracking-widest">OUT OF STOCK TRACKER</span>
+              <h3 className="font-sans font-black text-lg">แจ้งเตือนสินค้าพร้อมขาย</h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                ลงชื่อเมลของพี่ด้านล่างเพื่อรับเมลแจ้งเตือนทันทีที่ <strong>{backInStockProduct.brand} {backInStockProduct.name}</strong> กลับมามีในสต็อกหลังร้านครับ!
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-3 bg-zinc-950 p-3 rounded-xl border border-zinc-900">
+              <img src={backInStockProduct.image} alt={backInStockProduct.name} className="w-12 h-12 rounded object-cover border border-zinc-800" />
+              <div className="text-xs">
+                <p className="font-bold text-white leading-snug">{backInStockProduct.name}</p>
+                <p className="text-[#ccff00] font-mono mt-0.5">{backInStockProduct.price.toLocaleString()} ฿</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubscribeBackInStock} className="space-y-3">
+              <div className="flex flex-col space-y-1">
+                <label className="text-[9px] font-black uppercase text-zinc-500">อีเมลการแจ้งเตือน (Notification Email):</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-550">
+                    <Mail className="w-3.5 h-3.5" />
+                  </span>
+                  <input
+                    type="email"
+                    required
+                    placeholder="เช่น you@example.com"
+                    value={subscriptionEmail}
+                    onChange={(e) => setSubscriptionEmail(e.target.value)}
+                    className="w-full pl-9 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ccff00] outline-none placeholder:text-zinc-600"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2.5 bg-[#ccff00] text-[#0a0a0a] rounded-lg text-xs font-black uppercase tracking-wider hover:opacity-95 transition-opacity"
+              >
+                แจ้งเตือนฉันเมื่อของเข้าคลัง (Alert Me)
+              </button>
+            </form>
           </div>
         </div>
       )}

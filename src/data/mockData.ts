@@ -134,7 +134,7 @@ export const mockProducts: Product[] = [
     type: 'wheel',
     brand: 'BBS Germany',
     price: 48000,
-    stock: 4,
+    stock: 0,
     image: '/src/assets/images/bbs_lm_gold_1782224424577.jpg',
     description: 'The ultimate luxury motorsport mesh design. 2-piece forged structure, diamond cut rim lip.',
     size: 19,

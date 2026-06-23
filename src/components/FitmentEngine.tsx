@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Vehicle, Product } from '../types';
 import { mockVehicles } from '../data/mockData';
 import { 
@@ -17,7 +18,13 @@ import {
   Sparkles,
   TrendingUp,
   LayoutGrid,
-  Tag
+  Tag,
+  X,
+  Info,
+  Maximize2,
+  Filter,
+  Cpu,
+  Heart
 } from 'lucide-react';
 
 interface FitmentEngineProps {
@@ -28,6 +35,300 @@ interface FitmentEngineProps {
   onAddToComparison: (product: Product) => void;
   comparisonList: Product[];
   onTrackAction: (event: string) => void;
+  wishlist?: Product[];
+  onToggleWishlist?: (product: Product) => void;
+}
+
+interface ProductCardProps {
+  product: Product;
+  isWheel: boolean;
+  inComparison: boolean;
+  currentVehicle: Vehicle | null;
+  onAddToCart: (product: Product) => void;
+  onSelectProductForTryOn: (vehicle: Vehicle, wheel: Product) => void;
+  onAddToComparison: (product: Product) => void;
+  onOpenQuickLook: (product: Product) => void;
+  wishlist?: Product[];
+  onToggleWishlist?: (product: Product) => void;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({
+  product: p,
+  isWheel,
+  inComparison,
+  currentVehicle,
+  onAddToCart,
+  onSelectProductForTryOn,
+  onAddToComparison,
+  onOpenQuickLook,
+  wishlist,
+  onToggleWishlist
+}) => {
+  const isFavorited = wishlist?.some((item) => item.id === p.id) ?? false;
+  const [isTechPopoverOpen, setIsTechPopoverOpen] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setMousePos({ x, y });
+  };
+
+  return (
+    <motion.div
+      layout
+      variants={{
+        hidden: { opacity: 0, y: 30 },
+        show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 220, damping: 20 } }
+      }}
+      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-5 shadow-lg transition-all duration-300 hover:border-[#ccff00]/40 hover:shadow-[0_0_20px_rgba(204,255,0,0.08)]"
+    >
+      {/* Accent Ribbon for Stock levels */}
+      <div className="absolute top-3 right-3 z-10 flex items-center space-x-1.5">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onToggleWishlist) onToggleWishlist(p);
+          }}
+          className={`rounded-full transition-colors border p-2 cursor-pointer shadow-lg flex items-center justify-center ${
+            isFavorited
+              ? 'bg-rose-950/90 border-rose-500/50 text-rose-500 hover:bg-rose-900/40'
+              : 'bg-zinc-950/90 border-zinc-800 text-zinc-400 hover:bg-rose-950/20 hover:text-rose-500 hover:border-rose-500/30'
+          }`}
+          title={isFavorited ? "นำออกจากรายการโปรด" : "บันทึกในรายการโปรด"}
+        >
+          <Heart className={`w-3.5 h-3.5 ${isFavorited ? 'fill-rose-500' : ''}`} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenQuickLook(p);
+          }}
+          className="rounded-full bg-zinc-950/90 hover:bg-[#ccff00] hover:text-black transition-colors border border-zinc-800 p-2 text-zinc-350 cursor-pointer shadow-lg flex items-center justify-center"
+          title="ดูตัวอย่างสเปกด่วน (Quick Look)"
+        >
+          <Maximize2 className="w-3.5 h-3.5" />
+        </button>
+        {p.stock > 0 ? (
+          <span className="rounded-full bg-emerald-950/85 border border-emerald-800 text-emerald-400 px-2 py-0.5 text-[9px] font-extrabold font-mono">
+            เหลือ {p.stock} วง/เส้น
+          </span>
+        ) : (
+          <span className="rounded-full bg-rose-950/85 border border-rose-800 text-rose-400 px-2 py-0.5 text-[9px] font-extrabold font-mono">
+            หมดสต็อก
+          </span>
+        )}
+      </div>
+
+      {/* Product Layout */}
+      <div className="space-y-4">
+        {/* Photo Section with Hover-to-Zoom interactive mouse tracking */}
+        <div 
+          className="relative h-44 w-full rounded-xl bg-zinc-950 overflow-hidden border border-zinc-900 cursor-zoom-in"
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            setMousePos({ x: 50, y: 50 });
+          }}
+        >
+          <img 
+            src={p.image} 
+            alt={p.name} 
+            referrerPolicy="no-referrer"
+            style={{
+              transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
+              transform: isHovered ? 'scale(1.75)' : 'scale(1.0)',
+              transition: isHovered ? 'transform 0.05s ease-out' : 'transform 0.3s ease-out'
+            }}
+            className="h-full w-full object-cover pointer-events-none"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none"></div>
+          <div className="absolute bottom-2 left-2 flex flex-wrap gap-1 pointer-events-none">
+            <span className="rounded bg-black/70 px-2 py-0.5 text-[9px] uppercase font-bold text-zinc-300 tracking-wider">
+              {p.brand}
+            </span>
+            {isWheel ? (
+              <span className="rounded bg-[#ccff00] text-[#0a0a0a] px-1.5 py-0.5 text-[9px] font-black uppercase">
+                Forged R{p.size}
+              </span>
+            ) : (
+              <span className="rounded bg-sky-550 text-white px-1.5 py-0.5 text-[9px] font-black uppercase">
+                Sports Tyre
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Core Content */}
+        <div>
+          <h3 className="font-sans font-black text-lg leading-tight uppercase text-white group-hover:text-[#ccff00] transition-colors">{p.name}</h3>
+          <p className="mt-1 text-xs text-zinc-400 line-clamp-2 h-8 font-medium leading-relaxed">{p.description}</p>
+        </div>
+
+        {/* High Quality Specification values */}
+        <div className="relative rounded-xl bg-zinc-950/60 p-3 border border-zinc-900/80 font-mono text-[11px] text-zinc-400 space-y-1">
+          {isWheel ? (
+            <>
+              <div className="flex justify-between">
+                <span>ขนาด (Size/Offset):</span>
+                <strong className="text-white font-black">{p.size}″ x {p.width}J ET{p.offset}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>ค่ารู PCD ตรงรุ่น:</span>
+                <strong className="text-[#ccff00]">{p.pcdCompat?.join(', ')}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>น้ำหนัก (Weight/Net):</span>
+                <strong className="text-zinc-200">{p.weight} kg (ระดับเบาพิเศษ)</strong>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between">
+                <span>สเปกขนาดยาง (Width/Aspect):</span>
+                <strong className="text-white font-black">{p.tireWidth}/{p.tireAspect} R{p.tireSizeCompat}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>ยางคอมปาวด์ (Compound):</span>
+                <strong className="text-[#ccff00]">{p.compound}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Speed limits (Max):</span>
+                <strong className="text-zinc-200">{p.speedRating} (รถแข่งสนามซิ่ง)</strong>
+              </div>
+            </>
+          )}
+
+          {/* Interactive Technical Details Popover Trigger */}
+          <div className="pt-2 border-t border-zinc-900 flex justify-end">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsTechPopoverOpen(!isTechPopoverOpen);
+              }}
+              className="text-[10px] font-sans font-black uppercase text-[#ccff00]/80 hover:text-[#ccff00] flex items-center space-x-1 cursor-pointer"
+            >
+              <Info className="w-3 h-3" />
+              <span>{isTechPopoverOpen ? 'ปิดสเปกละเอียด' : 'เจาะลึกสเปกเทคนิคพิเศษ ⚙️'}</span>
+            </button>
+          </div>
+
+          {/* Technical Details Popover */}
+          <AnimatePresence>
+            {isTechPopoverOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute inset-x-0 bottom-full mb-2 bg-[#121212]/95 border border-zinc-800 rounded-xl p-3 shadow-2xl z-20 text-zinc-300 space-y-2 pointer-events-auto backdrop-blur-md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5">
+                  <span className="text-[10px] font-black uppercase text-[#ccff00] flex items-center space-x-1">
+                    <Cpu className="w-3 h-3 text-[#ccff00]" />
+                    <span>Technical Spec Sheet</span>
+                  </span>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsTechPopoverOpen(false);
+                    }}
+                    className="text-zinc-500 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                
+                {isWheel ? (
+                  <div className="space-y-1.5 text-[10px] font-semibold text-left">
+                    <p><span className="text-zinc-500">PCD Match:</span> <strong className="text-white font-mono">{p.pcdCompat?.join(', ') || 'N/A'}</strong></p>
+                    <p><span className="text-zinc-500">Offset (ET):</span> <strong className="text-[#ccff00] font-mono">ET{p.offset} mm</strong> (หลบคาร์ลิปเปอร์เบรกใหญ่พรีเมียมได้สบาย)</p>
+                    <p><span className="text-zinc-500">Center Bore (CB):</span> <strong className="text-white font-mono">{p.cbCompat || 73.1} mm</strong> (ติดตั้ง Hub Ring สำหรับเติมเต็มช่องว่าง)</p>
+                    <p><span className="text-zinc-500">Face Profile:</span> <strong className="text-white">Form-Z Ultra Concave Face</strong></p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 text-[10px] font-semibold text-left">
+                    <p><span className="text-zinc-500">Rim Compatibility:</span> <strong className="text-[#ccff00] font-mono">{p.tireSizeCompat}″ Rims</strong> (เหมาะกับกระทะล้อกว้าง {p.tireWidth ? Math.floor(p.tireWidth / 25.4) - 1.5 : '8.5'}-{p.tireWidth ? Math.floor(p.tireWidth / 25.4) + 0.5 : '9.5'}J)</p>
+                    <p><span className="text-zinc-500">Speed Multiplier:</span> <strong className="text-white font-mono">Rating {p.speedRating || 'Y'}</strong> (ทนทานความร้อนสูง ความเร็วแรงแซงโค้ง)</p>
+                    <p><span className="text-zinc-500">Compound Type:</span> <strong className="text-white">{p.compound || 'Semi-Slick Formula'}</strong></p>
+                    <p><span className="text-zinc-500">Treadwear Index:</span> <strong className="text-white font-mono">TW 200 AA A (แก้มหนาโค้งดีเยี่ยม)</strong></p>
+                  </div>
+                )}
+                
+                <div className="text-[8.5px] text-zinc-500 italic border-t border-zinc-900 pt-1 leading-normal text-left">
+                  *สเตปการตั้งค่าระดับอุตสาหกรรม การควบคุมด้วยศูนย์ตั้งล้อซิ่งไร้สั่นสะเทือน 100%
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Pricing & Control Hub */}
+      <div className="mt-4 pt-3 border-t border-zinc-900">
+        <div className="flex items-baseline justify-between mb-3">
+          <span className="text-[10px] uppercase font-black tracking-widest text-zinc-500">ราคาแนะนำพิเศษ:</span>
+          <span className="text-xl font-black italic tracking-tight text-[#ccff00]">
+            {p.price.toLocaleString()} <span className="text-xs font-normal">฿</span>
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {/* Primary Purchase / Add to basket */}
+          <button
+            onClick={() => onAddToCart(p)}
+            disabled={p.stock === 0}
+            className="w-full py-2 bg-zinc-900 border border-zinc-800 text-white rounded-lg text-xs font-black uppercase text-center transition-all hover:bg-[#ccff00] hover:text-[#0a0a0a] disabled:opacity-45 hover:border-[#ccff00] flex items-center justify-center space-x-1 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>ใส่ตะกร้า</span>
+          </button>
+
+          {/* Virtual Fitting Simulator launch */}
+          {isWheel ? (
+            <button
+              onClick={() => {
+                const veh = currentVehicle || mockVehicles[0]; // fallback default JDM
+                onSelectProductForTryOn(veh, p);
+              }}
+              className="w-full py-2 bg-[#ccff00]/10 border border-[#ccff00]/20 text-[#ccff00] rounded-lg text-xs font-black uppercase text-center transition-all hover:bg-[#ccff00]/20 flex items-center justify-center space-x-1 cursor-pointer"
+              title="ลองดูว่าล้อนี้ใส่บนรถพี่จะเท่แค่ไหน!"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>ลองใส่รถ</span>
+            </button>
+          ) : (
+            <button
+              disabled
+              className="w-full py-2 bg-zinc-950 border border-zinc-900 text-zinc-700 rounded-lg text-xs font-medium uppercase text-center flex items-center justify-center cursor-not-allowed"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>ขอบ {p.tireSizeCompat}″</span>
+            </button>
+          )}
+        </div>
+
+        {/* Add to Comparison Checklist Drawer */}
+        <button
+          onClick={() => onAddToComparison(p)}
+          className={`mt-2 w-full py-1.5 text-[10px] font-black uppercase tracking-wider rounded border text-center transition-all flex items-center justify-center space-x-1 cursor-pointer ${
+            inComparison 
+              ? 'bg-amber-950/20 border-amber-800/40 text-amber-400 hover:text-rose-400' 
+              : 'bg-zinc-950/40 border-zinc-900 text-zinc-500 hover:text-white hover:border-zinc-700'
+          }`}
+        >
+          <Scale className="w-3 h-3" />
+          <span>{inComparison ? 'ถอนตัวเปรียบเทียบ' : 'นำเข้าเปรียบเทียบสเปก'}</span>
+        </button>
+      </div>
+    </motion.div>
+  );
 }
 
 export default function FitmentEngine({
@@ -53,6 +354,15 @@ export default function FitmentEngine({
   // Layout States: 'hybrid' | 'carousel' | 'grid' | 'list'
   const [layoutMode, setLayoutMode] = useState<'hybrid' | 'carousel' | 'grid' | 'list'>('hybrid');
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
+
+  // Slide-out Filter Drawer states
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState<boolean>(false);
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  const [selectedPriceTier, setSelectedPriceTier] = useState<string>('all'); // 'all' | 'under20k' | '20kto35k' | 'over35k'
+  const [selectedWeightClass, setSelectedWeightClass] = useState<string>('all'); // 'all' | 'ultralight' | 'light' | 'regular'
+
+  // Quick Look Overlay State
+  const [selectedQuickLookProduct, setSelectedQuickLookProduct] = useState<Product | null>(null);
 
   // Derive filter choices
   const brands = Array.from(new Set(vehicles.map((v) => v.brand)));
@@ -92,7 +402,7 @@ export default function FitmentEngine({
 
   // Compatibility logic:
   // - If a vehicle is selected, filter wheels by PCD compatibility (e.g. 5x114.3 is compatible with ['5x114.3']), and show proper tire size match.
-  // - If no vehicle selected, show all items.
+  // - Include premium slide-out drawer attributes
   const filteredProducts = products.filter((p) => {
     // Search query
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -106,12 +416,41 @@ export default function FitmentEngine({
     // Vehicle Fitment Match
     if (currentVehicle) {
       if (p.type === 'wheel') {
-        return p.pcdCompat?.includes(currentVehicle.pcd) ?? false;
-      } else if (p.type === 'tire') {
-        // High performance track tires matches typical JDM sizes (18 inch inner diameter for 18 wheels)
-        return true; 
+        const carriesPcd = p.pcdCompat?.includes(currentVehicle.pcd) ?? false;
+        if (!carriesPcd) return false;
       }
     }
+
+    // 1. Wheel Finishes Filter
+    if (p.type === 'wheel' && selectedFinishes.length > 0) {
+      const colorLower = (p.color || '').toLowerCase();
+      const matchAnyFinish = selectedFinishes.some(f => {
+        if (f === 'bronze') return colorLower.includes('bronze') || colorLower.includes('almite');
+        if (f === 'black') return colorLower.includes('black') || colorLower.includes('dark');
+        if (f === 'silver') return colorLower.includes('silver') || colorLower.includes('machined') || colorLower.includes('face');
+        if (f === 'gunmetal') return colorLower.includes('gunmetal') || colorLower.includes('grey') || colorLower.includes('carbon');
+        return colorLower.includes(f.toLowerCase());
+      });
+      if (!matchAnyFinish) return false;
+    }
+
+    // 2. Price ranges (Under 20k, 20k-35k, Over 35k)
+    if (selectedPriceTier !== 'all') {
+      if (selectedPriceTier === 'under20k' && p.price >= 20000) return false;
+      if (selectedPriceTier === '20kto35k' && (p.price < 20000 || p.price > 35000)) return false;
+      if (selectedPriceTier === 'over35k' && p.price <= 35000) return false;
+    }
+
+    // 3. Weight classes (Under 8.0kg - S-Light, 8.0-9.5kg - Light, Over 9.5kg - Regular)
+    if (selectedWeightClass !== 'all') {
+      if (p.type === 'wheel') {
+        const wt = p.weight || 0;
+        if (selectedWeightClass === 'ultralight' && wt >= 8.0) return false;
+        if (selectedWeightClass === 'light' && (wt < 8.0 || wt > 9.5)) return false;
+        if (selectedWeightClass === 'regular' && wt <= 9.5) return false;
+      }
+    }
+
     return true;
   });
 
@@ -121,6 +460,9 @@ export default function FitmentEngine({
     setSelectedYear('');
     setSelectedSubModel('');
     setCurrentVehicle(null);
+    setSelectedFinishes([]);
+    setSelectedPriceTier('all');
+    setSelectedWeightClass('all');
   };
 
   return (
@@ -323,6 +665,22 @@ export default function FitmentEngine({
                 <span className="hidden sm:inline">List</span>
               </button>
             </div>
+
+            {/* Premium Slide-out Filter Drawer Trigger */}
+            <button
+              onClick={() => setIsFilterDrawerOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all bg-zinc-950 border border-zinc-900 hover:border-[#ccff00]/40 text-zinc-300 hover:text-[#ccff00] cursor-pointer"
+              title="ตัวกรองคัดแยกขั้นสูง"
+            >
+              <Sliders className="w-3.5 h-3.5 text-[#ccff00]" />
+              <span>ตัวกรองขั้นสูง</span>
+              {(selectedFinishes.length > 0 || selectedPriceTier !== 'all' || selectedWeightClass !== 'all') && (
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ccff00] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ccff00]"></span>
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Instant Search text input */}
@@ -337,6 +695,63 @@ export default function FitmentEngine({
           </div>
 
         </div>
+
+        {/* Active Filters Horizontal Chip Row */}
+        {(selectedFinishes.length > 0 || selectedPriceTier !== 'all' || selectedWeightClass !== 'all') && (
+          <div className="flex flex-wrap items-center gap-2 bg-zinc-950/20 p-3 rounded-xl border border-zinc-900/60">
+            <span className="text-[10px] uppercase font-black tracking-widest text-[#ccff00]/80">ตัวกรองแยกสเปก:</span>
+            
+            {/* Finishes */}
+            {selectedFinishes.map(fn => (
+              <span key={fn} className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-[#ccff00]/10 border border-[#ccff00]/30 text-[#ccff00] rounded-lg text-[10px] font-bold">
+                <span className="capitalize">{fn} Finish</span>
+                <button 
+                  onClick={() => setSelectedFinishes(prev => prev.filter(item => item !== fn))}
+                  className="text-zinc-550 hover:text-white hover:bg-zinc-800 rounded p-0.5"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </span>
+            ))}
+
+            {/* Price Tier */}
+            {selectedPriceTier !== 'all' && (
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-[#ccff00]/10 border border-[#ccff00]/30 text-[#ccff00] rounded-lg text-[10px] font-bold">
+                <span>ราคา: {selectedPriceTier === 'under20k' ? 'ต่ำกว่า 20K ฿' : selectedPriceTier === '20kto35k' ? '20K - 35K ฿' : 'เกิน 35K ฿'}</span>
+                <button 
+                  onClick={() => setSelectedPriceTier('all')}
+                  className="text-zinc-550 hover:text-white hover:bg-zinc-800 rounded p-0.5"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </span>
+            )}
+
+            {/* Weight Class */}
+            {selectedWeightClass !== 'all' && (
+              <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-[#ccff00]/10 border border-[#ccff00]/30 text-[#ccff00] rounded-lg text-[10px] font-bold">
+                <span>น้ำหนัก: {selectedWeightClass === 'ultralight' ? 'เบาพิเศษ (< 8kg)' : selectedWeightClass === 'light' ? 'เบาพอดี (8-9.5kg)' : 'สปอร์ต (> 9.5kg)'}</span>
+                <button 
+                  onClick={() => setSelectedWeightClass('all')}
+                  className="text-zinc-550 hover:text-white hover:bg-zinc-800 rounded p-0.5"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </span>
+            )}
+
+            <button 
+              onClick={() => {
+                setSelectedFinishes([]);
+                setSelectedPriceTier('all');
+                setSelectedWeightClass('all');
+              }}
+              className="text-[10px] font-black uppercase text-rose-450 hover:underline ml-auto"
+            >
+              ล้างตัวกรองพิเศษทั้งหมด
+            </button>
+          </div>
+        )}
 
         {/* Dynamic Items Listing layouts */}
         
@@ -779,7 +1194,7 @@ export default function FitmentEngine({
                                   const veh = currentVehicle || mockVehicles[0];
                                   onSelectProductForTryOn(veh, p);
                                 }}
-                                className="p-1.5 bg-[#ccff00]/10 hover:bg-[#ccff00]/25 text-[#ccff00] rounded border border-[#ccff00]/20"
+                                className="p-1.5 bg-[#ccff00]/10 hover:bg-[#ccff00]/25 text-[#ccff00] rounded border border-[#ccff00]/20 cursor-pointer"
                                 title="ประกอบจำลองบนตัวถังรถ"
                               >
                                 <Eye className="w-3.5 h-3.5" />
@@ -790,7 +1205,7 @@ export default function FitmentEngine({
                             <button
                               onClick={() => onAddToCart(p)}
                               disabled={p.stock === 0}
-                              className="p-1.5 bg-[#ccff00] text-black disabled:opacity-30 rounded hover:opacity-90 flex items-center justify-center"
+                              className="p-1.5 bg-[#ccff00] text-black disabled:opacity-30 rounded hover:opacity-90 flex items-center justify-center cursor-pointer"
                               title="หยิบใส่รถ"
                             >
                               <Plus className="w-3.5 h-3.5" />
@@ -818,164 +1233,42 @@ export default function FitmentEngine({
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div 
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.06
+                  }
+                }
+              }}
+              initial="hidden"
+              animate="show"
+              key={`${selectedBrand}-${selectedModel}-${selectedYear}-${selectedSubModel}-${selectedPriceTier}-${selectedWeightClass}-${selectedFinishes.join(',')}`}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
               {filteredProducts.map((p) => {
                 const isWheel = p.type === 'wheel';
                 const inComparison = comparisonList.some(item => item.id === p.id);
 
                 return (
-                  <div 
+                  <ProductCard
                     key={p.id}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-5 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:border-[#ccff00]/40"
-                  >
-                    {/* Accent Ribbon for Stock levels */}
-                    <div className="absolute top-3 right-3 z-10">
-                      {p.stock > 0 ? (
-                        <span className="rounded-full bg-emerald-950/80 border border-emerald-800 text-emerald-400 px-2 py-0.5 text-[9px] font-extrabold font-mono">
-                          เหลือ {p.stock} วง/เส้น
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-rose-950/80 border border-rose-800 text-rose-400 px-2 py-0.5 text-[9px] font-extrabold font-mono">
-                          หมดสต็อก
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Product Layout */}
-                    <div className="space-y-4">
-                      {/* Photo Section */}
-                      <div className="relative h-44 w-full rounded-xl bg-zinc-950 overflow-hidden border border-zinc-900">
-                        <img 
-                          src={p.image} 
-                          alt={p.name} 
-                          referrerPolicy="no-referrer"
-                          className="h-full w-full object-cover transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-                          <span className="rounded bg-black/60 px-2 py-0.5 text-[9px] uppercase font-bold text-zinc-300 tracking-wider">
-                            {p.brand}
-                          </span>
-                          {isWheel ? (
-                            <span className="rounded bg-[#ccff00] text-[#0a0a0a] px-1.5 py-0.5 text-[9px] font-black uppercase">
-                              Forged R18
-                            </span>
-                          ) : (
-                            <span className="rounded bg-sky-500 text-white px-1.5 py-0.5 text-[9px] font-black uppercase">
-                              Sports Tyre
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Core Content */}
-                      <div>
-                        <h3 className="font-sans font-black text-lg leading-tight uppercase text-white group-hover:text-[#ccff00] transition-colors">{p.name}</h3>
-                        <p className="mt-1 text-xs text-zinc-400 line-clamp-2 h-8 font-medium leading-relaxed">{p.description}</p>
-                      </div>
-
-                      {/* High Quality Specification values */}
-                      <div className="rounded-xl bg-zinc-950/60 p-3 border border-zinc-900/80 font-mono text-[11px] text-zinc-400 space-y-1">
-                        {isWheel ? (
-                          <>
-                            <div className="flex justify-between">
-                              <span>ขนาด (Size/Offset):</span>
-                              <strong className="text-white font-black">{p.size}″ x {p.width}J ET{p.offset}</strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>ค่ารู PCD:</span>
-                              <strong className="text-[#ccff00]">{p.pcdCompat?.join(', ')}</strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>น้ำหนัก (Weight):</span>
-                              <strong className="text-zinc-200">{p.weight} kg (โคตรเบา)</strong>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex justify-between">
-                              <span>สเปกขนาดยาง (Width/Aspect):</span>
-                              <strong className="text-white font-black">{p.tireWidth}/{p.tireAspect} R{p.tireSizeCompat}</strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>ชนิดยางคอมปาวด์ (Compound):</span>
-                              <strong className="text-[#ccff00]">{p.compound}</strong>
-                            </div>
-                            <div className="flex justify-between">
-                              <span>Speed Rating:</span>
-                              <strong className="text-zinc-200">{p.speedRating} (ซิ่งได้ถึง 300km/h)</strong>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Pricing & Control Hub */}
-                    <div className="mt-4 pt-3 border-t border-zinc-900">
-                      
-                      <div className="flex items-baseline justify-between mb-3">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-[#ccff00]/70">ราคาต่อวง/เส้น</span>
-                        <span className="text-xl font-black italic tracking-tight text-[#ccff00]">
-                          {p.price.toLocaleString()} <span className="text-xs font-normal">฿</span>
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        
-                        {/* Primary Purchase / Add to bundle */}
-                        <button
-                          onClick={() => onAddToCart(p)}
-                          disabled={p.stock === 0}
-                          className="w-full py-2 bg-zinc-900 border border-zinc-800 text-white rounded-lg text-xs font-black uppercase text-center transition-all hover:bg-[#ccff00] hover:text-[#0a0a0a] disabled:opacity-45 hover:border-[#ccff00] flex items-center justify-center space-x-1 cursor-pointer"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>ใส่ตะกร้า</span>
-                        </button>
-
-                        {/* Virtual Fitting Simulator launch */}
-                        {isWheel ? (
-                          <button
-                            onClick={() => {
-                              const veh = currentVehicle || mockVehicles[0]; // fallback default JDM
-                              onSelectProductForTryOn(veh, p);
-                            }}
-                            className="w-full py-2 bg-[#ccff00]/10 border border-[#ccff00]/20 text-[#ccff00] rounded-lg text-xs font-black uppercase text-center transition-all hover:bg-[#ccff00]/20 flex items-center justify-center space-x-1 cursor-pointer"
-                            title="ลองดูว่าล้อนี้ใส่บนรถพี่จะเท่แค่ไหน!"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>ลองเสมือนจริง</span>
-                          </button>
-                        ) : (
-                          <button
-                            disabled
-                            className="w-full py-2 bg-zinc-950 border border-zinc-900 text-zinc-700 rounded-lg text-xs font-medium uppercase text-center flex items-center justify-center cursor-not-allowed"
-                          >
-                            <ShieldCheck className="w-3.5 h-3.5" />
-                            <span>ยางขอบ {p.tireSizeCompat}</span>
-                          </button>
-                        )}
-
-                      </div>
-
-                      {/* Add to Comparison Checklist Drawer */}
-                      <button
-                        onClick={() => onAddToComparison(p)}
-                        className={`mt-2 w-full py-1.5 text-[10px] font-black uppercase tracking-wider rounded border text-center transition-all flex items-center justify-center space-x-1 cursor-pointer ${
-                          inComparison 
-                            ? 'bg-amber-950/20 border-amber-800/40 text-amber-400 hover:text-rose-400' 
-                            : 'bg-zinc-950/40 border-zinc-900 text-zinc-500 hover:text-white hover:border-zinc-700'
-                        }`}
-                      >
-                        <Scale className="w-3 h-3" />
-                        <span>{inComparison ? 'ถอนตัวเปรียบเทียบ' : 'นำเข้าเปรียบเทียบสเปก'}</span>
-                      </button>
-
-                    </div>
-
-                  </div>
+                    product={p}
+                    isWheel={isWheel}
+                    inComparison={inComparison}
+                    currentVehicle={currentVehicle}
+                    onAddToCart={onAddToCart}
+                    onSelectProductForTryOn={onSelectProductForTryOn}
+                    onAddToComparison={onAddToComparison}
+                    onOpenQuickLook={(prod) => setSelectedQuickLookProduct(prod)}
+                    wishlist={wishlist}
+                    onToggleWishlist={onToggleWishlist}
+                  />
                 );
               })}
-            </div>
+            </motion.div>
 
           </div>
         )}
@@ -996,6 +1289,265 @@ export default function FitmentEngine({
         )}
 
       </div>
+
+      {/* 1. Slide-out Filter Drawer (Cabinet Drawer) */}
+      <AnimatePresence>
+        {isFilterDrawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFilterDrawerOpen(false)}
+              className="fixed inset-0 bg-black z-50 backdrop-blur-xs cursor-pointer"
+            />
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-[#090909] border-l border-zinc-800 p-6 shadow-2xl z-50 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between border-b border-zinc-900 pb-4 mb-6">
+                  <div className="flex items-center space-x-2">
+                    <Filter className="w-5 h-5 text-[#ccff00]" />
+                    <span className="font-sans font-black uppercase text-white tracking-wider text-sm">คัดกรองสเปกขั้นสูง (Special Filters)</span>
+                  </div>
+                  <button 
+                    onClick={() => setIsFilterDrawerOpen(false)}
+                    className="rounded-lg bg-zinc-905 border border-zinc-800 p-2 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Wheel finish multi-select */}
+                  <div className="space-y-3 text-left">
+                    <h5 className="text-xs font-black uppercase text-zinc-400 tracking-wider">โทนสีและฟินิชขอบล้อ (Wheel Finishes)</h5>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Bronze', 'Black', 'Silver', 'Gunmetal'].map(finish => {
+                        const isSelected = selectedFinishes.includes(finish.toLowerCase());
+                        return (
+                          <button
+                            key={finish}
+                            onClick={() => {
+                              const val = finish.toLowerCase();
+                              setSelectedFinishes(prev => 
+                                isSelected ? prev.filter(f => f !== val) : [...prev, val]
+                              );
+                            }}
+                            className={`px-3 py-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
+                              isSelected 
+                                ? 'bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]' 
+                                : 'bg-zinc-950 border-zinc-900 text-zinc-400 hover:border-zinc-800 hover:text-white'
+                            }`}
+                          >
+                            <span>{finish}</span>
+                            {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-[#ccff00]" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Price range selector */}
+                  <div className="space-y-3 text-left">
+                    <h5 className="text-xs font-black uppercase text-zinc-400 tracking-wider">ช่วงราคาจำหน่ายจำกัดงบ</h5>
+                    <div className="space-y-2">
+                      {[
+                        { label: 'แสดงราคาจัดเต็มทั้งหมด', value: 'all' },
+                        { label: 'งบเริ่มต้นเซฟๆ (ต่ำกว่า 20,000 ฿)', value: 'under20k' },
+                        { label: 'ระดับกลางลู่วิ่งซิ่ง (20,000 ฿ - 35,000 ฿)', value: '20kto35k' },
+                        { label: 'รุ่นใหญ่คาร์บอนตัวแท้ (มากกว่า 35,000 ฿)', value: 'over35k' }
+                      ].map(item => {
+                        const isSelected = selectedPriceTier === item.value;
+                        return (
+                          <button
+                            key={item.value}
+                            onClick={() => setSelectedPriceTier(item.value)}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
+                              isSelected 
+                                ? 'bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]' 
+                                : 'bg-zinc-950 border-zinc-900 text-zinc-400 hover:border-zinc-800 hover:text-white'
+                            }`}
+                          >
+                            <span>{item.label}</span>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-[#ccff00] flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Weight specifications */}
+                  <div className="space-y-3 text-left">
+                    <h5 className="text-xs font-black uppercase text-zinc-400 tracking-wider">ระดับชั้นน้ำหนักล้อ (Weight Class)</h5>
+                    <div className="space-y-2">
+                      {[
+                        { label: 'แสดงน้ำหนักทั้งหมด', value: 'all' },
+                        { label: 'ระดับเบาเป็นพิเศษปลิวลม (ต่ำกว่า 8.0 kg)', value: 'ultralight' },
+                        { label: 'น้ำหนักขับขี่สนามพรีเมียม (8.0 kg - 9.5 kg)', value: 'light' },
+                        { label: 'ทนแรงกระแทกความเร็วสูง (มากกว่า 9.5 kg)', value: 'regular' }
+                      ].map(item => {
+                        const isSelected = selectedWeightClass === item.value;
+                        return (
+                          <button
+                            key={item.value}
+                            onClick={() => setSelectedWeightClass(item.value)}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
+                              isSelected 
+                                ? 'bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]' 
+                                : 'bg-zinc-950 border-zinc-900 text-zinc-400 hover:border-zinc-800 hover:text-white'
+                            }`}
+                          >
+                            <span>{item.label}</span>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-[#ccff00] flex-shrink-0" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-zinc-900 pt-4 mt-6 grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    setSelectedFinishes([]);
+                    setSelectedPriceTier('all');
+                    setSelectedWeightClass('all');
+                  }}
+                  className="py-3 bg-zinc-950 border border-zinc-900 hover:border-zinc-800 rounded-xl text-zinc-400 hover:text-white text-xs font-black uppercase text-center cursor-pointer"
+                >
+                  ล้างค่าตัวกรอง
+                </button>
+                <button
+                  onClick={() => setIsFilterDrawerOpen(false)}
+                  className="py-3 bg-[#ccff00] text-black hover:opacity-90 rounded-xl text-xs font-black uppercase text-center cursor-pointer"
+                >
+                  นำไปค้นหาตัวกรอง
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* 2. 'Quick Look' Large Model Overlay */}
+      <AnimatePresence>
+        {selectedQuickLookProduct && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.7 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedQuickLookProduct(null)}
+              className="fixed inset-0 bg-black/90 z-50 backdrop-blur-xs cursor-pointer"
+            />
+            {/* Modal Body */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                transition={{ type: 'spring', damping: 25 }}
+                className="relative w-full max-w-3xl bg-[#090909] border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
+              >
+                {/* Close Button top-right */}
+                <button
+                  onClick={() => setSelectedQuickLookProduct(null)}
+                  className="absolute top-4 right-4 z-10 bg-black/80 hover:bg-[#ccff00]/20 border border-zinc-800 hover:border-[#ccff00]/40 p-2 text-zinc-400 hover:text-[#ccff00] rounded-full cursor-pointer transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                  {/* Visual Column */}
+                  <div className="relative h-64 md:h-full min-h-[320px] bg-zinc-950 overflow-hidden">
+                    <img 
+                      src={selectedQuickLookProduct.image} 
+                      alt={selectedQuickLookProduct.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover animate-pulse-slow" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                    <div className="absolute bottom-5 left-5 right-5 space-y-1.5 text-left">
+                      <span className="px-2.5 py-1 rounded bg-[#ccff00] text-black font-black uppercase text-[10px] tracking-wider">
+                        {selectedQuickLookProduct.type === 'wheel' ? 'Custom Forged Wheel' : 'Sports Compound Tire'}
+                      </span>
+                      <h4 className="text-xl font-black text-white">{selectedQuickLookProduct.brand} Premium Series</h4>
+                    </div>
+                  </div>
+
+                  {/* Highlights Details Column */}
+                  <div className="p-6 md:p-8 flex flex-col justify-between space-y-6">
+                    <div className="space-y-4 text-left">
+                      <div>
+                        <div className="text-xs uppercase font-extrabold text-[#ccff00] tracking-widest">{selectedQuickLookProduct.brand} Rims & Co</div>
+                        <h3 className="text-2xl font-black uppercase tracking-tight text-white leading-tight mt-1">{selectedQuickLookProduct.name}</h3>
+                      </div>
+
+                      <p className="text-xs text-zinc-400 leading-relaxed font-semibold">
+                        {selectedQuickLookProduct.description}
+                      </p>
+
+                      {/* Performance Highlights listing */}
+                      <div className="space-y-2.5">
+                        <span className="text-[10px] uppercase font-black text-zinc-500 tracking-wider">ไฮไลต์ประสิทธิภาพหลัก (Special Highlights)</span>
+                        <ul className="space-y-1.5 text-xs text-zinc-300">
+                          <li className="flex items-start space-x-2">
+                            <span className="text-[#ccff00] mt-0.5">•</span>
+                            <span><strong>Forging แกร่งผ่านความร้อนสูง 10k ตัน</strong>: แหนบเหล็กชิ้นเดียวลดปริมาตรรีโมเลกุล แข็งแรงเบาสุดขั้ว</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="text-[#ccff00] mt-0.5">•</span>
+                            <span><strong>ช่องเบรกระบายพลังงานความร้อนสูง</strong>: อากาศไหลผ่านตัวเรือนเพื่อยืดอายุการซิ่งในสนามให้ปลอดภัย</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="text-[#ccff00] mt-0.5">•</span>
+                            <span><strong>สารเคลือบ Nano-Finish สะกดสายตา</strong>: ต้านทานฝุ่นรอยและหินขูดเบยสนามสนามแข่งอย่างหายห่วง</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-zinc-900 pt-6 flex flex-col space-y-3">
+                      <div className="flex items-baseline justify-between">
+                        <span className="text-xs font-black uppercase text-zinc-500 tracking-widest">ราคาครบเครื่องแนะนำ</span>
+                        <span className="text-2xl font-sans font-black italic text-[#ccff00]">{selectedQuickLookProduct.price.toLocaleString()} ฿</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        <button
+                          onClick={() => {
+                            onAddToCart(selectedQuickLookProduct);
+                            setSelectedQuickLookProduct(null);
+                          }}
+                          className="w-full py-3 bg-[#ccff00] text-black hover:opacity-90 rounded-xl text-xs font-black uppercase tracking-wide cursor-pointer flex items-center justify-center space-x-1.5"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>ใส่ตะกร้าช็อป</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedQuickLookProduct(null)}
+                          className="w-full py-3 bg-zinc-950 border border-zinc-900 hover:border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-black uppercase tracking-wide cursor-pointer"
+                        >
+                          ปิดหน้าต่าง
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
 
     </div>
   );
