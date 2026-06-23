@@ -146,164 +146,57 @@ export default function Header({
         {/* BRANDING LOGO with custom spin and hover tilt effects */}
         <motion.div
           onClick={() => setActiveTab("fitment")}
-          className="flex cursor-pointer items-center space-x-3.5 outline-none"
+          className="flex cursor-pointer items-center space-x-4 outline-none group"
           role="link"
           tabIndex={0}
-          aria-label="Gee Lil-Racing Homepage"
+          aria-label="Gee Fitment System Homepage"
           onKeyDown={(e) => {
             if (e.key === "Enter") setActiveTab("fitment");
           }}
           whileHover="hover"
         >
-          <div className="relative flex h-13 w-13 items-center justify-center rounded-xl bg-[#0a0a0a] p-1 ring-2 ring-[#ccff00] shadow-[0_0_20px_rgba(204,255,0,0.3)] overflow-hidden">
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0a0a0a] p-1.5 ring-2 ring-[#ccff00] shadow-[0_0_25px_rgba(204,255,0,0.2)] overflow-hidden">
             <motion.div
               variants={{
                 hover: {
                   rotate: 360,
-                  transition: { duration: 1.0, ease: "easeInOut" },
+                  transition: { duration: 1.2, ease: "easeInOut" },
                 },
               }}
               className="relative z-10 flex h-full w-full items-center justify-center"
             >
               <svg
-                className="w-10 h-10"
+                className="w-full h-full"
                 viewBox="0 0 100 100"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                {/* Outermost Tire Tread Border */}
-                <circle cx="50" cy="50" r="46" stroke="#222" strokeWidth="4" />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="42"
-                  stroke="#444"
-                  strokeWidth="1"
-                  strokeDasharray="3 3"
-                />
-
-                {/* Premium Metallic Wheel Rim Outer Barrel Lip */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="39"
-                  stroke="#ccff00"
-                  strokeWidth="1.5"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="36"
-                  stroke="#ffffff"
-                  strokeWidth="0.5"
-                  strokeOpacity="0.8"
-                />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="34"
-                  stroke="#111111"
-                  strokeWidth="1"
-                />
-
-                {/* Ventilated Drilled Brake Disc Rotor behind spokes */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="25"
-                  fill="#333"
-                  stroke="#222"
-                  strokeWidth="1"
-                />
-                {/* Ventilation Holes */}
-                <circle cx="42" cy="42" r="1" fill="#111" />
-                <circle cx="58" cy="58" r="1" fill="#111" />
-                <circle cx="42" cy="58" r="1" fill="#111" />
-                <circle cx="58" cy="42" r="1" fill="#111" />
-                <circle cx="50" cy="38" r="1" fill="#111" />
-                <circle cx="50" cy="62" r="1" fill="#111" />
-                <circle cx="38" cy="50" r="1" fill="#111" />
-                <circle cx="62" cy="50" r="1" fill="#111" />
-
-                {/* Racing Sports 6-Spoke Design (TE37 styled high performance spokes) */}
-                <path
-                  d="M50 14 L50 32 M50 32 L47 34 L53 34 Z"
-                  stroke="#ccff00"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M50 86 L50 68 M50 68 L47 66 L53 66 Z"
-                  stroke="#ccff00"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M19 32.5 L34.5 41.5 M34.5 41.5 L33 44.5 L36 41 Z"
-                  stroke="#ccff00"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M81 67.5 L65.5 58.5 M65.5 58.5 L67 55.5 L64 59 Z"
-                  stroke="#ccff00"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M19 67.5 L34.5 58.5 M34.5 58.5 L33 55.5 L36 59 Z"
-                  stroke="#ccff00"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M81 32.5 L65.5 41.5 M65.5 41.5 L67 44.5 L64 41 Z"
-                  stroke="#ccff00"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-
-                {/* Hub Bolt Circle & Core Center Cap */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="11"
-                  fill="#111"
-                  stroke="#ccff00"
-                  strokeWidth="1"
-                />
-                <circle cx="50" cy="50" r="5" fill="#ccff00" />
-                <circle cx="50" cy="50" r="2" fill="#fff" />
-
-                {/* Hub Nuts */}
-                <circle cx="46" cy="46" r="1" fill="#fff" />
-                <circle cx="54" cy="54" r="1" fill="#fff" />
-                <circle cx="46" cy="54" r="1" fill="#fff" />
-                <circle cx="54" cy="46" r="1" fill="#fff" />
+                {/* Simplified, cleaner iconic wheel */}
+                <circle cx="50" cy="50" r="46" stroke="#ccff00" strokeWidth="3" />
+                <circle cx="50" cy="50" r="38" stroke="#ffffff" strokeWidth="2" strokeOpacity="0.5" />
+                <path d="M50 14 L50 32 M50 86 L50 68 M19 32.5 L34.5 41.5 M81 67.5 L65.5 58.5 M19 67.5 L34.5 58.5 M81 32.5 L65.5 41.5" stroke="#ccff00" strokeWidth="4" strokeLinecap="round" />
+                <circle cx="50" cy="50" r="8" fill="#ccff00" />
+                <circle cx="50" cy="50" r="3" fill="#0a0a0a" />
               </svg>
             </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#ccff00]/10 to-transparent"></div>
           </div>
 
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-sans font-black tracking-tight text-3xl uppercase italic text-white flex items-center">
-                GEE{" "}
-                <span className="text-[#ccff00] ml-1.5 font-sans not-italic">
-                  ล้อซิ่ง
-                </span>
+              <span className="font-sans font-black tracking-tighter text-3xl uppercase italic text-white flex items-center">
+                GEE
               </span>
               <motion.span
                 initial={{ scale: 0.9 }}
                 animate={{ scale: [0.9, 1.05, 0.9] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="rounded-full bg-[#ccff00] px-2 py-0.5 text-[9px] font-black uppercase text-[#0a0a0a] tracking-wider"
+                transition={{ repeat: Infinity, duration: 3 }}
+                className="rounded-full bg-[#ccff00] px-2 py-0.5 text-[10px] font-black uppercase text-[#0a0a0a] tracking-wider"
               >
                 PRO
               </motion.span>
             </div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
-              Industrial Fitment System
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 group-hover:text-[#ccff00] transition-colors">
+              Fitment Systems
             </p>
           </div>
         </motion.div>

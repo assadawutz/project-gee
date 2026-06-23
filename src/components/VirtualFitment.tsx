@@ -501,20 +501,20 @@ export default function VirtualFitment({
 
         {/* Footer Summary */}
         <div className="p-6 border-t border-zinc-900 bg-black">
-           <div className="flex items-center justify-between mb-4">
+           <div className="flex items-center justify-between mb-5">
               <div>
-                 <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest block">Estimated Total Quote</span>
+                 <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest block">Estimated Total</span>
                  <div className="flex items-baseline space-x-1">
-                    <span className="text-2xl font-black italic text-white tracking-tighter">{(selectedWheel.price * 4 + selectedTire.price * 4 + 2500).toLocaleString()}</span>
+                    <span className="text-3xl font-black italic text-white tracking-tighter">{(selectedWheel.price * 4 + selectedTire.price * 4 + 2500).toLocaleString()}</span>
                     <span className="text-sm font-bold text-[#ccff00] uppercase">฿</span>
                  </div>
               </div>
               <div className="text-right">
                  <span className="text-[9px] text-emerald-500 font-black uppercase tracking-widest block">Installation Included</span>
-                 <span className="text-[11px] text-zinc-400 font-bold uppercase">+ Alignment</span>
+                 <span className="text-[11px] text-zinc-400 font-bold uppercase">+ Wheel Alignment</span>
               </div>
            </div>
-           <button className="w-full py-4 bg-white text-black hover:bg-zinc-200 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center space-x-2">
+           <button className="w-full py-4 bg-[#ccff00] text-black hover:bg-lime-400 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center space-x-3 shadow-[0_0_20px_rgba(204,255,0,0.2)]">
               <span>Checkout Configuration</span>
               <ArrowRight className="w-4 h-4" />
            </button>
