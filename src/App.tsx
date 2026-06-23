@@ -3,7 +3,6 @@ import Header from "./components/Header";
 import LandingPage from "./components/LandingPage";
 import FitmentEngine from "./components/FitmentEngine";
 import VirtualFitment from "./components/VirtualFitment";
-import BundleBuilder from "./components/BundleBuilder";
 import BookingCalendar from "./components/BookingCalendar";
 import ComparisonDrawer from "./components/ComparisonDrawer";
 import AdminDashboard from "./components/AdminDashboard";
@@ -538,6 +537,7 @@ export default function App() {
                       setWizardStep("virtual");
                     }}
                     onAddToCart={handleAddToCart}
+                    onAddBundleToCart={handleAddBundleToCart}
                     onAddToComparison={handleAddToComparison}
                     comparisonList={comparisonList}
                     onTrackAction={handleTrackAction}
@@ -552,14 +552,6 @@ export default function App() {
                     selectedWheel={tryOnWheel || mockProducts[0]}
                     selectedTire={tryOnTire || mockProducts.find(p => p.type === 'tire') || mockProducts[0]}
                     onClose={() => setWizardStep("fitment")}
-                  />
-                )}
-
-                {wizardStep === "bundle" && (
-                  <BundleBuilder
-                    products={products}
-                    onAddBundleToCart={handleAddBundleToCart}
-                    onTrackAction={handleTrackAction}
                   />
                 )}
               </>
