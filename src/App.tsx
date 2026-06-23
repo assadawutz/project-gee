@@ -32,6 +32,8 @@ import {
   User,
   QrCode,
   Smartphone,
+  Download,
+  Package,
 } from "lucide-react";
 
 export default function App() {
@@ -190,10 +192,15 @@ export default function App() {
   const [tryOnWheel, setTryOnWheel] = useState<Product | null>(null);
   const [tryOnTire, setTryOnTire] = useState<Product | null>(null);
 
-  // Simulated Stripe Checkout Modal states
   const [checkoutOpen, setCheckoutOpen] = useState<boolean>(false);
-  const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1); // 1: Card info, 2: Success
+  const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3>(1); // 1: Shipping, 2: Payment, 3: Success
   const [paymentMethod, setPaymentMethod] = useState<"card" | "qr">("card");
+  const [shippingInfo, setShippingInfo] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
   const [checkoutPayload, setCheckoutPayload] = useState({
     cardName: "",
     cardNumber: "4111 2222 3333 4444",
@@ -610,278 +617,214 @@ export default function App() {
               </div>
             </div>
 
-            {/* Payment Method Tabs */}
-            <div className="flex space-x-2">
-               <button 
-                onClick={() => setPaymentMethod("card")}
-                className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "card" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
-               >
-                  <CreditCard className="w-4 h-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Card</span>
-               </button>
-               <button 
-                onClick={() => setPaymentMethod("qr")}
-                className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "qr" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
-               >
-                  <QrCode className="w-4 h-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">PromptPay</span>
-               </button>
-            </div>
-
-            {checkoutStep === 1 ? (
-              paymentMethod === "card" ? (
-                <form onSubmit={handleCheckoutSubmit} className="space-y-5">
-                <div className="border-b border-zinc-900 pb-3">
-                  <span className="text-[10px] uppercase font-black text-[#ccff00] tracking-widest">
-                    STRIPE GATEWAY BINDING
-                  </span>
-                  <h3 className="font-sans font-black text-lg">
-                    ประมวลชำระบัญชีล้อแต่ง
-                  </h3>
-                </div>
-
-                {/* 3D CREDIT CARD DISPLAY WITH BOTH SIDE SUPPORT ON CVV FOCUS */}
-                <div className="perspective-1000 w-full h-40 relative">
-                  <div
-                    className={`w-full h-full rounded-xl p-5 bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 flex flex-col justify-between transition-transform duration-700 transform-style-3d shadow-xl relative ${
-                      isCvvFocused ? "rotate-y-180" : ""
-                    }`}
-                  >
-                    {/* FRONT SIDE */}
-                    <div
-                      className={`absolute inset-0 p-5 flex flex-col justify-between backface-invisible ${isCvvFocused ? "hidden" : "block"}`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <span className="font-mono text-zinc-600 text-xs tracking-widest">
-                          GEE RACER CREDIT
-                        </span>
-                        <CreditCard className="w-8 h-8 text-[#ccff00]" />
-                      </div>
-                      <p className="font-mono text-base tracking-widest text-zinc-200">
-                        {checkoutPayload.cardNumber}
-                      </p>
-                      <div className="flex justify-between items-end font-mono text-[10px] text-zinc-500">
-                        <div>
-                          <p className="uppercase text-[8px]">CARDHOLDER</p>
-                          <p className="text-zinc-300 font-bold truncate max-w-[150px]">
-                            {checkoutPayload.cardName || "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="uppercase text-[8px]">EXPIRY</p>
-                          <p className="text-zinc-300 font-bold">
-                            {checkoutPayload.cardExpiry}
-                          </p>
-                        </div>
-                      </div>
+            {/* Multi-Step Flow Tracker */}
+            {checkoutStep < 3 && (
+              <div className="flex items-center justify-between px-2 mb-8">
+                {[
+                  { step: 1, label: "Shipping", icon: Package },
+                  { step: 2, label: "Payment", icon: CreditCard },
+                ].map((s) => (
+                  <div key={s.step} className="flex flex-col items-center flex-1 relative">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-500 border-2 ${checkoutStep >= s.step ? 'bg-[#ccff00] border-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.4)]' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
+                      <s.icon className="w-3.5 h-3.5" />
                     </div>
-
-                    {/* BACK SIDE (Shown on CVV field Focus!) */}
-                    <div
-                      className={`absolute inset-0 p-5 flex flex-col justify-between bg-zinc-950 border border-zinc-800 rounded-xl transform rotate-y-180 backface-invisible ${isCvvFocused ? "block" : "hidden"}`}
-                    >
-                      <div className="h-6 w-full bg-zinc-900 -mx-5 mt-2"></div>
-                      <div className="flex justify-end items-center pr-3 space-x-2">
-                        <span className="text-[8px] font-mono text-zinc-500">
-                          SECRET SIGNATURE
-                        </span>
-                        <span className="bg-white text-black font-mono text-xs font-black px-2 py-0.5 rounded italic">
-                          {checkoutPayload.cardCvv}
-                        </span>
-                      </div>
-                      <p className="text-[8px] text-zinc-600 font-mono text-center">
-                        NOT TRANSFERABLE • STRIPE INC.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* INPUT FIELDS */}
-                <div className="space-y-3.5">
-                  <div className="flex flex-col space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">
-                      ชื่อเจ้าของบัตร (Cardholder Name):
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="เช่น WITTAYA CHAROEMPAN"
-                      value={checkoutPayload.cardName}
-                      onChange={(e) =>
-                        setCheckoutPayload({
-                          ...checkoutPayload,
-                          cardName: e.target.value.toUpperCase(),
-                        })
-                      }
-                      className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-bold text-white uppercase focus:border-[#ccff00] outline-none"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="flex flex-col space-y-1 col-span-2">
-                      <label className="text-[10px] font-bold text-zinc-500 uppercase">
-                        หมายเลขบัตร (Card Number):
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={checkoutPayload.cardNumber}
-                        onChange={(e) =>
-                          setCheckoutPayload({
-                            ...checkoutPayload,
-                            cardNumber: e.target.value,
-                          })
-                        }
-                        className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ccff00] outline-none"
-                      />
-                    </div>
-
-                    <div className="flex flex-col space-y-1">
-                      <label className="text-[10px] font-bold text-zinc-500 uppercase">
-                        CVV:
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={3}
-                        value={checkoutPayload.cardCvv}
-                        onChange={(e) =>
-                          setCheckoutPayload({
-                            ...checkoutPayload,
-                            cardCvv: e.target.value,
-                          })
-                        }
-                        onFocus={() => setIsCvvFocused(true)}
-                        onBlur={() => setIsCvvFocused(false)}
-                        className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ccff00] outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Installments options (0% interest logic) */}
-                  <div className="flex flex-col space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">
-                      เลือกผ่อนชำระค่างวดแต่งรถ (Installments Planner):
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCheckoutPayload({
-                            ...checkoutPayload,
-                            installments: "none",
-                          })
-                        }
-                        className={`py-1.5 rounded-lg text-[10px] font-black uppercase text-center border ${
-                          checkoutPayload.installments === "none"
-                            ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]"
-                            : "bg-zinc-950 border-zinc-900 text-zinc-400"
-                        }`}
-                      >
-                        จ่ายสดลดเพิ่ม
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setCheckoutPayload({
-                            ...checkoutPayload,
-                            installments: "6",
-                          })
-                        }
-                        className={`py-1.5 rounded-lg text-[10px] font-black uppercase text-center border ${
-                          checkoutPayload.installments === "6"
-                            ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]"
-                            : "bg-zinc-950 border-zinc-900 text-zinc-400"
-                        }`}
-                      >
-                        ผ่อน 6 เดือน ดอก 0%
-                      </button>
-                    </div>
-                    {checkoutPayload.installments === "6" && (
-                      <p className="text-[10px] text-emerald-400 font-bold font-mono">
-                        ตกเดือนละ{" "}
-                        {(netCheckoutAmount / 6).toFixed(0).toLocaleString()} ฿
-                        x 6 เดือน ตรงสเปกสบายใจ!
-                      </p>
+                    <span className={`text-[8px] font-black uppercase mt-2 tracking-widest ${checkoutStep >= s.step ? 'text-[#ccff00]' : 'text-zinc-600'}`}>
+                      {s.label}
+                    </span>
+                    {s.step === 1 && (
+                      <div className={`absolute top-4 left-[60%] w-[80%] h-0.5 z-0 ${checkoutStep > 1 ? 'bg-[#ccff00]' : 'bg-zinc-900'}`} />
                     )}
                   </div>
-                </div>
-
-                {/* Pricing values and Payment trigger button */}
-                <div className="border-t border-zinc-900 pt-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] text-zinc-500 uppercase">
-                      ชำระรวมสุทธิ:
-                    </p>
-                    <p className="text-xl font-black text-[#ccff00] italic font-sans">
-                      {netCheckoutAmount.toLocaleString()} ฿
-                    </p>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 bg-[#ccff00] text-[#0a0a0a] rounded-lg font-sans font-black text-xs uppercase tracking-wider hover:bg-lime-400"
-                  >
-                    ยืนยันคำสั่งซื้อด่วน
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-6 py-4 flex flex-col items-center">
-                 <div className="p-6 bg-white rounded-2xl shadow-xl shadow-[#ccff00]/10 border-4 border-zinc-900">
-                    <QrCode className="w-48 h-48 text-black" />
-                    <div className="mt-4 flex items-center justify-center space-x-2 text-black">
-                       <Smartphone className="w-4 h-4" />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Scan to Pay</span>
-                    </div>
-                 </div>
-
-                 <div className="text-center space-y-2">
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Total Amount to Pay</p>
-                    <p className="text-3xl font-black italic text-[#ccff00] tracking-tighter">{netCheckoutAmount.toLocaleString()} ฿</p>
-                 </div>
-
-                 <div className="w-full space-y-3 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                    <div className="flex justify-between items-center text-[10px]">
-                       <span className="text-zinc-500 font-bold uppercase">Account Name:</span>
-                       <span className="text-white font-black">GEE FITMENT CO., LTD.</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px]">
-                       <span className="text-zinc-500 font-bold uppercase">Bank:</span>
-                       <span className="text-white font-black">KASIKORNBANK (K-BANK)</span>
-                    </div>
-                 </div>
-
-                 <button
-                    onClick={() => {
-                      showToast("ชำระเงินสำเร็จผ่าน QR เรียบร้อย!", "success");
-                      setCheckoutStep(2);
-                    }}
-                    className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-lime-400 transition-all"
-                  >
-                    I HAVE PAID (แจ้งชำระเงิน)
-                  </button>
+                ))}
               </div>
-            )
-          ) : (
-              <div className="text-center py-6 space-y-4 animate-fade-in">
-                <CheckCircle2 className="mx-auto w-12 h-12 text-[#ccff00]" />
+            )}
+
+            {checkoutStep === 1 ? (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 uppercase">Full Name</label>
+                      <input 
+                        type="text" value={shippingInfo.name} onChange={(e) => setShippingInfo({...shippingInfo, name: e.target.value})}
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-zinc-500 uppercase">Phone</label>
+                      <input 
+                        type="text" value={shippingInfo.phone} onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50"
+                        placeholder="081-XXX-XXXX"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Email Address</label>
+                    <input 
+                      type="email" value={shippingInfo.email} onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})}
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">Shipping Address</label>
+                    <textarea 
+                      value={shippingInfo.address} onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})}
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50 min-h-[80px]"
+                      placeholder="123 Moo 4, Bangkok, Thailand..."
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-zinc-900/50 rounded-2xl p-5 border border-zinc-800 space-y-4">
+                  <h4 className="text-[10px] font-black uppercase text-zinc-400">Order Summary</h4>
+                  <div className="space-y-2">
+                    {cart.map((item, idx) => (
+                      <div key={idx} className="flex justify-between items-center text-[11px]">
+                        <span className="text-zinc-500 font-bold">{item.quantity}x {item.product.name}</span>
+                        <span className="text-white font-black italic">{(item.product.price * item.quantity).toLocaleString()} ฿</span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-zinc-800 flex justify-between items-center text-sm">
+                      <span className="text-[#ccff00] font-black uppercase italic">Total</span>
+                      <span className="text-[#ccff00] font-black italic">{netCheckoutAmount.toLocaleString()} ฿</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setCheckoutStep(2)}
+                  className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-[0.2em] hover:bg-lime-400 transition-all shadow-xl shadow-[#ccff00]/10"
+                >
+                  Continue to Payment
+                </button>
+              </div>
+            ) : checkoutStep === 2 ? (
+              <div className="space-y-6">
+                {/* Payment Method Tabs */}
+                <div className="flex space-x-2">
+                   <button 
+                    onClick={() => setPaymentMethod("card")}
+                    className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "card" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
+                   >
+                      <CreditCard className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Card</span>
+                   </button>
+                   <button 
+                    onClick={() => setPaymentMethod("qr")}
+                    className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "qr" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
+                   >
+                      <QrCode className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">PromptPay</span>
+                   </button>
+                </div>
+
+                {paymentMethod === "card" ? (
+                  <form onSubmit={handleCheckoutSubmit} className="space-y-5">
+                    {/* 3D CREDIT CARD DISPLAY */}
+                    <div className="perspective-1000 w-full h-40 relative">
+                      <div className={`w-full h-full rounded-xl p-5 bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 flex flex-col justify-between transition-transform duration-700 transform-style-3d shadow-xl relative ${isCvvFocused ? "rotate-y-180" : ""}`}>
+                        {/* FRONT SIDE */}
+                        <div className={`absolute inset-0 p-5 flex flex-col justify-between backface-invisible ${isCvvFocused ? "hidden" : "block"}`}>
+                          <div className="flex justify-between items-start">
+                            <span className="font-mono text-zinc-600 text-xs tracking-widest">GEE RACER CREDIT</span>
+                            <CreditCard className="w-8 h-8 text-[#ccff00]" />
+                          </div>
+                          <p className="font-mono text-base tracking-widest text-zinc-200">{checkoutPayload.cardNumber}</p>
+                          <div className="flex justify-between items-end font-mono text-[10px] text-zinc-500">
+                            <div>
+                              <p className="uppercase text-[8px]">CARDHOLDER</p>
+                              <p className="text-zinc-300 font-bold truncate max-w-[150px]">{checkoutPayload.cardName || "N/A"}</p>
+                            </div>
+                            <div>
+                              <p className="uppercase text-[8px]">EXPIRY</p>
+                              <p className="text-zinc-300 font-bold">{checkoutPayload.cardExpiry}</p>
+                            </div>
+                          </div>
+                        </div>
+                        {/* BACK SIDE */}
+                        <div className={`absolute inset-0 p-5 flex flex-col justify-between bg-zinc-950 border border-zinc-800 rounded-xl transform rotate-y-180 backface-invisible ${isCvvFocused ? "block" : "hidden"}`}>
+                          <div className="h-6 w-full bg-zinc-900 -mx-5 mt-2"></div>
+                          <div className="flex justify-end items-center pr-3 space-x-2">
+                            <span className="text-[8px] font-mono text-zinc-500">SECRET SIGNATURE</span>
+                            <span className="bg-white text-black font-mono text-xs font-black px-2 py-0.5 rounded italic">{checkoutPayload.cardCvv}</span>
+                          </div>
+                          <p className="text-[8px] text-zinc-600 font-mono text-center">NOT TRANSFERABLE • STRIPE INC.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3.5">
+                      <div className="flex flex-col space-y-1">
+                        <label className="text-[10px] font-bold text-zinc-500 uppercase">Cardholder Name</label>
+                        <input
+                          type="text" required placeholder="WITTAYA CHAROEMPAN" value={checkoutPayload.cardName}
+                          onChange={(e) => setCheckoutPayload({...checkoutPayload, cardName: e.target.value.toUpperCase()})}
+                          className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-bold text-white uppercase focus:border-[#ccff00] outline-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="flex flex-col space-y-1 col-span-2">
+                          <label className="text-[10px] font-bold text-zinc-500 uppercase">Card Number</label>
+                          <input
+                            type="text" required value={checkoutPayload.cardNumber}
+                            onChange={(e) => setCheckoutPayload({...checkoutPayload, cardNumber: e.target.value})}
+                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ccff00] outline-none"
+                          />
+                        </div>
+                        <div className="flex flex-col space-y-1">
+                          <label className="text-[10px] font-bold text-zinc-500 uppercase">CVV</label>
+                          <input
+                            type="text" required maxLength={3} value={checkoutPayload.cardCvv}
+                            onChange={(e) => setCheckoutPayload({...checkoutPayload, cardCvv: e.target.value})}
+                            onFocus={() => setIsCvvFocused(true)} onBlur={() => setIsCvvFocused(false)}
+                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ccff00] outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-lime-400 transition-all">
+                      Confirm Payment
+                    </button>
+                  </form>
+                ) : (
+                  <div className="space-y-6 py-4 flex flex-col items-center">
+                     <div className="p-6 bg-white rounded-2xl shadow-xl shadow-[#ccff00]/10 border-4 border-zinc-900">
+                        <QrCode className="w-48 h-48 text-black" />
+                        <div className="mt-4 flex items-center justify-center space-x-2 text-black">
+                           <Smartphone className="w-4 h-4" />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Scan to Pay</span>
+                        </div>
+                     </div>
+                     <button onClick={() => { showToast("Payment Successful!", "success"); setCheckoutStep(3); }}
+                        className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-lime-400 transition-all"
+                      >
+                        I HAVE PAID
+                      </button>
+                  </div>
+                )}
+                <button onClick={() => setCheckoutStep(1)} className="w-full text-[10px] font-black uppercase text-zinc-600 hover:text-white transition-colors">Back to Shipping</button>
+              </div>
+            ) : (
+              <div className="text-center py-10 space-y-6 animate-fade-in">
+                <div className="w-20 h-20 bg-[#ccff00] rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-[#ccff00]/20 rotate-12">
+                  <CheckCircle2 className="w-10 h-10 text-black" />
+                </div>
                 <div>
-                  <h3 className="font-sans font-black text-lg uppercase text-white">
-                    ชำระเครดิตเรียบร้อยโรงงานจีจี้!
-                  </h3>
-                  <p className="mt-1 text-xs text-zinc-400">
-                    บิลและรายการสั่งล้อฟอร์ชของพี่ถูกบันทึกลงแฟ้มประวัติหลังร้าน
-                    และหักสต็อกหน้าร้านเป็นอันเสร็จสิ้น
-                    ขับซิ่งปลอดภัยพวงมาลัยตรงครับพี่!
+                  <h3 className="font-sans font-black text-2xl uppercase italic text-white">Order Confirmed</h3>
+                  <p className="mt-2 text-xs text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
+                    Your build has been registered. Our engineering team is preparing your hardware for shipment.
                   </p>
                 </div>
-
-                <button
-                  onClick={() => setCheckoutOpen(false)}
-                  className="w-full py-2 bg-zinc-900 border border-zinc-800 hover:border-[#ccff00] text-white rounded-lg text-xs font-black uppercase tracking-wider"
-                >
-                  ปิดหน้าร้าง / ทำการแต่งคันอื่นต่อ
+                <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 inline-block">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Order ID:</span>
+                  <span className="text-[#ccff00] font-black ml-2 font-mono">#GEE-{Math.floor(100000 + Math.random() * 900000)}</span>
+                </div>
+                <button onClick={() => setCheckoutOpen(false)} className="w-full py-4 bg-white text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-all">
+                  Return to Workspace
                 </button>
               </div>
             )}

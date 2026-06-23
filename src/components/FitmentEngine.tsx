@@ -23,7 +23,8 @@ import {
   ShieldCheck,
   Coins,
   BadgePercent,
-  FileText
+  FileText,
+  Download
 } from "lucide-react";
 import { Vehicle, Product } from "../types";
 import { mockVehicles, mockProducts } from "../data/mockData";
@@ -75,13 +76,28 @@ export default function FitmentEngine({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const [activeProductType, setActiveProductType] = useState<"wheel" | "tire" | "bundle">("wheel");
-  
+  const [activeSuspensionPreset, setActiveSuspensionPreset] = useState<"stock" | "lowered" | "stanced">("stock");
+  const [showToast, setShowToast] = useState(false);
+
   // Interaction States
   const [wheelSize, setWheelSize] = useState(18);
-  const [rideHeight, setRideHeight] = useState(0); // Offset in pixels or %
-  const [camber, setCamber] = useState(0); // Degrees
-  const [offset, setOffset] = useState(0); // For deep dish / poke effect
-  const [showToast, setShowToast] = useState(false);
+  const [rideHeight, setRideHeight] = useState(0); 
+  const [camber, setCamber] = useState(0); 
+  const [offset, setOffset] = useState(0);
+
+  const applySuspensionPreset = (preset: "stock" | "lowered" | "stanced") => {
+    setActiveSuspensionPreset(preset);
+    if (preset === "stock") {
+      setRideHeight(0);
+      setCamber(0);
+    } else if (preset === "lowered") {
+      setRideHeight(1.5);
+      setCamber(-1.5);
+    } else if (preset === "stanced") {
+      setRideHeight(3.5);
+      setCamber(-4.5);
+    }
+  };
   const [isSimulationOpen, setIsSimulationOpen] = useState(false);
   const [quantity, setQuantity] = useState<number>(4);
 
@@ -259,6 +275,18 @@ export default function FitmentEngine({
                       <Sliders className="w-3.5 h-3.5 text-[#ccff00]" />
                    </div>
                    
+                   <div className="flex gap-1 mb-4 p-1 bg-zinc-900/50 rounded-lg">
+                      {(['stock', 'lowered', 'stanced'] as const).map(p => (
+                        <button 
+                          key={p}
+                          onClick={() => applySuspensionPreset(p)}
+                          className={`flex-1 py-1.5 text-[8px] font-black uppercase rounded-md transition-all ${activeSuspensionPreset === p ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                   </div>
+
                    <div className="space-y-4">
                       <div className="space-y-2">
                          <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500">
@@ -338,7 +366,35 @@ export default function FitmentEngine({
                 </section>
             )}
 
-            <section className="space-y-4">
+            <section className="space-y-6">
+               <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center space-x-2">
+                        <span className="w-1.5 h-1.5 bg-[#ccff00] rounded-full"></span>
+                        <span>Catalog Search</span>
+                     </h3>
+                  </div>
+
+                  <div className="relative group">
+                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-[#ccff00] transition-colors" />
+                     <input 
+                       type="text" 
+                       placeholder={`Search ${activeProductType}s...`}
+                       value={searchQuery}
+                       onChange={(e) => setSearchQuery(e.target.value)}
+                       className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-white placeholder:text-zinc-700 outline-none focus:border-[#ccff00]/50 transition-all"
+                     />
+                     {searchQuery && (
+                       <button 
+                         onClick={() => setSearchQuery("")}
+                         className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-white"
+                       >
+                         <X className="w-3 h-3" />
+                       </button>
+                     )}
+                  </div>
+               </div>
+
                {activeProductType !== 'bundle' && (
                    <div className="flex space-x-2 overflow-x-auto no-scrollbar pb-2">
                       {BRANDS.map(brand => (
@@ -413,13 +469,22 @@ export default function FitmentEngine({
                       <span className="text-sm font-bold text-zinc-500 uppercase">฿</span>
                    </div>
                 </div>
-                <button 
-                  onClick={() => activeProductType === 'bundle' ? onAddBundleToCart?.(selectedWheel, selectedTire, quantity, finalDiscount) : onAddToCart?.(selectedWheel)}
-                  className="px-10 h-16 bg-[#ccff00] hover:bg-lime-400 text-black rounded-2xl flex items-center space-x-3 transition-all transform active:scale-95 shadow-2xl shadow-[#ccff00]/20"
-                >
-                   <span className="text-xs font-black uppercase tracking-[0.2em]">Add to Quote</span>
-                   <ArrowRight className="w-5 h-5" />
-                </button>
+                 <div className="flex gap-4 items-center">
+                    <button 
+                      onClick={() => alert("Build configuration saved to your local registry!")}
+                      className="h-16 px-6 bg-zinc-900 border border-zinc-800 text-white rounded-2xl flex items-center justify-center hover:border-[#ccff00] transition-all group"
+                    >
+                      <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+                    </button>
+                    
+                    <button 
+                      onClick={() => activeProductType === 'bundle' ? onAddBundleToCart?.(selectedWheel, selectedTire, quantity, finalDiscount) : onAddToCart?.(selectedWheel)}
+                      className="flex-1 h-16 bg-[#ccff00] hover:bg-lime-400 text-black rounded-2xl flex items-center justify-center space-x-3 transition-all transform active:scale-95 shadow-2xl shadow-[#ccff00]/20"
+                    >
+                       <span className="text-xs font-black uppercase tracking-[0.2em]">Add to Quote</span>
+                       <ArrowRight className="w-5 h-5" />
+                    </button>
+                 </div>
              </div>
           </div>
         </aside>
