@@ -17,30 +17,37 @@ export default function Navigation({ activeTab, setActiveTab, user, onLoginClick
   ];
 
   return (
-    <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-1 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-zinc-800 p-1.5 rounded-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`flex items-center gap-2.5 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-              activeTab === item.id 
-                ? 'bg-[#ccff00] text-black' 
-                : 'text-zinc-500 hover:text-white'
-            }`}
-          >
-            <item.icon className="w-3.5 h-3.5" />
-            {item.label}
-          </button>
-        ))}
-        <div className="w-px h-6 bg-zinc-800 mx-1" />
+    <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-zinc-800">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2" onClick={() => setActiveTab('landing')}>
+          <Zap className="w-6 h-6 text-[#ccff00]" />
+          <span className="text-xl font-black italic tracking-tighter text-white">GEE</span>
+        </div>
+        
+        <nav className="flex items-center gap-1">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                activeTab === item.id 
+                  ? 'text-[#ccff00] bg-zinc-900' 
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              <item.icon className="w-3.5 h-3.5" />
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
         <button
           onClick={user ? () => setActiveTab('profile') : onLoginClick}
-          className="flex items-center gap-2 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white"
+          className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 transition-all"
         >
-          {user ? user.name : 'Login'}
+          {user ? user.name : 'Sign In'}
         </button>
       </div>
-    </nav>
+    </header>
   );
 }
