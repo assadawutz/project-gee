@@ -1,0 +1,6 @@
+{
+  "name": "Gee Official Platform (จีจี้ ล้อซิ่ง)",
+  "description": "Industrial Racing e-Commerce Platform with Gee Fitment Engine, Virtual Wheel & Tire Fitment, Real-time Booking, Spec Comparison, and Live AI Chat Suggestions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
