@@ -4,13 +4,27 @@ export interface Vehicle {
   model: string;
   year: string;
   subModel: string;
-  pcd: string;      // Pitch Circle Diameter (e.g., 5x114.3)
-  cb: string;       // Center Bore (e.g., 67.1)
+  pcd: string; // Pitch Circle Diameter (e.g., 5x114.3)
+  cb: string; // Center Bore (e.g., 67.1)
   boltPattern: string;
-  image: string;    // Silhouette / side-view vehicle image for Fitment Simulation
+  image: string; // Silhouette / side-view vehicle image for Fitment Simulation
 }
 
-export type ProductType = 'wheel' | 'tire';
+export type ProductType = "wheel" | "tire" | "part";
+
+export interface ProductReview {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number; // 1-5
+  comment: string;
+  date: string;
+}
+
+export interface PricePoint {
+  date: string;
+  price: number;
+}
 
 export interface Product {
   id: string;
@@ -21,22 +35,32 @@ export interface Product {
   stock: number;
   image: string;
   description: string;
-  
+
+  // Rating and Reviews
+  rating?: number;
+  reviewCount?: number;
+  reviews?: ProductReview[];
+
+  // Style category
+  style?: string; // e.g., 'Aggressive Stance', 'Luxury Deep Dish', 'Rugged Off-road', 'Classic Retro', 'Carbon Fiber'
+  tags?: string[]; // e.g., 'hot', 'new', 'recommend'
+  priceHistory?: PricePoint[];
+
   // Specific to Wheels
-  size?: number;       // e.g., 18 (in inches)
-  width?: number;      // e.g., 8.5 (in inches)
-  offset?: number;     // e.g., 35 (in mm)
+  size?: number; // e.g., 18 (in inches)
+  width?: number; // e.g., 8.5 (in inches)
+  offset?: number; // e.g., 35 (in mm)
   pcdCompat?: string[]; // PCD patterns supported, e.g., ["5x114.3", "5x120"]
-  cbCompat?: number;    // Center bore supported, e.g., 73.1
-  color?: string;       // e.g., Gloss Black, Dark Bronze, Formula Silver
-  weight?: number;      // e.g., 8.2 (in kg)
-  
+  cbCompat?: number; // Center bore supported, e.g., 73.1
+  color?: string; // e.g., Gloss Black, Dark Bronze, Formula Silver
+  weight?: number; // e.g., 8.2 (in kg)
+
   // Specific to Tyres
-  tireWidth?: number;  // e.g., 225
+  tireWidth?: number; // e.g., 225
   tireAspect?: number; // e.g., 40
   tireSizeCompat?: number; // Inner diameter matching the wheel size (e.g. 18)
   speedRating?: string; // e.g., W, Y
-  compound?: string;    // e.g., R-Compound, Sports Ultra High Performance
+  compound?: string; // e.g., R-Compound, Sports Ultra High Performance
 }
 
 export interface Compatibility {
@@ -55,7 +79,7 @@ export interface Booking {
   timeSlot: string;
   servicesSelected: string[];
   totalPrice: number;
-  status: 'Pending' | 'Confirmed' | 'Completed';
+  status: "Pending" | "Confirmed" | "Completed";
 }
 
 export interface OrderItem {
@@ -70,12 +94,27 @@ export interface Order {
   customerPhone: string;
   items: OrderItem[];
   totalAmount: number;
-  paymentStatus: 'Paid' | 'Unpaid';
+  paymentStatus: "Paid" | "Unpaid";
   createdAt: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  avatar?: string;
+  role: "user" | "admin";
+  geeCoins: number;
+  totalSpend: number;
+  membershipTier: "Bronze" | "Silver" | "Gold" | "Platinum";
+  savedVehicles: Vehicle[];
+  orders: Order[];
+  bookings: Booking[];
+}
+
 export interface ChatMessage {
-  sender: 'user' | 'assistant' | 'system';
+  sender: "user" | "assistant" | "system";
   text: string;
   timestamp: string;
 }

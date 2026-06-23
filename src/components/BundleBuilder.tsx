@@ -17,8 +17,8 @@ export default function BundleBuilder({
   const wheelsList = products.filter((p) => p.type === 'wheel');
   const tiresList = products.filter((p) => p.type === 'tire');
 
-  const [selectedWheel, setSelectedWheel] = useState<Product>(wheelsList[0]);
-  const [selectedTire, setSelectedTire] = useState<Product>(tiresList[0]);
+  const [selectedWheel, setSelectedWheel] = useState<Product>(wheelsList[0] || mockProducts[0]);
+  const [selectedTire, setSelectedTire] = useState<Product>(tiresList[0] || mockProducts.find(p => p.type === 'tire') || mockProducts[0]);
   
   // Set configurations (typically cars require standard 4 wheels + 4 tires)
   const [quantity, setQuantity] = useState<number>(4); // e.g. set of 4 wheels
@@ -26,8 +26,8 @@ export default function BundleBuilder({
   // Discounts logic:
   // - Wheels + Tires bundle gets 10% standard discount.
   // - If buying standard set of 4, append a flat 2,500 THB JDM loyalty coupon discount!
-  const wheelTotal = selectedWheel.price * quantity;
-  const tireTotal = selectedTire.price * quantity;
+  const wheelTotal = (selectedWheel?.price || 0) * quantity;
+  const tireTotal = (selectedTire?.price || 0) * quantity;
   const rawSubTotal = wheelTotal + tireTotal;
 
   // Calculate savings
@@ -37,9 +37,9 @@ export default function BundleBuilder({
   const finalPayAmount = rawSubTotal - finalDiscount;
 
   // Compatibility Checks
-  const sizeCompatMsg = selectedWheel.size === selectedTire.tireSizeCompat 
-    ? { ok: true, text: `ตรงไซส์พอดีเป๊ะ! (ขอบ ${selectedWheel.size} เท่ากัน)` }
-    : { ok: false, text: `ขนาดขอบล้อกับแก้มยางไม่แมทซ์กันเกรงว่าจะใส่ยากครับพี่! (ล้อขอบ ${selectedWheel.size} ยางขอบ ${selectedTire.tireSizeCompat})` };
+  const sizeCompatMsg = selectedWheel?.size === selectedTire?.tireSizeCompat 
+    ? { ok: true, text: `ตรงไซส์พอดีเป๊ะ! (ขอบ ${selectedWheel?.size || 'N/A'} เท่ากัน)` }
+    : { ok: false, text: `ขนาดขอบล้อกับแก้มยางไม่แมทซ์กันเกรงว่าจะใส่ยากครับพี่! (ล้อขอบ ${selectedWheel?.size || 'N/A'} ยางขอบ ${selectedTire?.tireSizeCompat || 'N/A'})` };
 
   const handleAddBundle = () => {
     onAddBundleToCart(selectedWheel, selectedTire, quantity, finalDiscount);
@@ -158,16 +158,16 @@ export default function BundleBuilder({
       doc.setTextColor(30, 30, 30);
 
       // Wheels
-      doc.text(`${selectedWheel.brand} Wheels Set`, 20, 144);
-      doc.text(`Width ${selectedWheel.width}J Offset +${selectedWheel.offset} JDM Spec`, 75, 144);
+      doc.text(`${selectedWheel?.brand || 'Premium'} Wheels Set`, 20, 144);
+      doc.text(`Width ${selectedWheel?.width || 'N/A'}J Offset +${selectedWheel?.offset || '0'} JDM Spec`, 75, 144);
       doc.text(`x ${quantity}`, 145, 144);
-      doc.text(`${selectedWheel.price.toLocaleString()} THB`, 165, 144);
+      doc.text(`${(selectedWheel?.price || 0).toLocaleString()} THB`, 165, 144);
 
       // Tires
-      doc.text(`${selectedTire.brand} Performance Tires`, 20, 151);
-      doc.text(`Speed Compound rating: ${selectedTire.speedRating || 'Y'}`, 75, 151);
+      doc.text(`${selectedTire?.brand || 'Performance'} Performance Tires`, 20, 151);
+      doc.text(`Speed Compound rating: ${selectedTire?.speedRating || 'Y'}`, 75, 151);
       doc.text(`x ${quantity}`, 145, 151);
-      doc.text(`${selectedTire.price.toLocaleString()} THB`, 165, 151);
+      doc.text(`${(selectedTire?.price || 0).toLocaleString()} THB`, 165, 151);
 
       // Mounting & Installation
       doc.text('Mounting & Wheel Balancing', 20, 158);
@@ -398,7 +398,7 @@ export default function BundleBuilder({
               </div>
               <div className="flex justify-between">
                 <span>ราคารวมยางซิ่ง:</span>
-                <span className="text-zinc-200">{(selectedTire.price * quantity).toLocaleString()} ฿</span>
+                <span className="text-zinc-200">{((selectedTire?.price || 0) * quantity).toLocaleString()} ฿</span>
               </div>
               <div className="flex justify-between text-[#ccff00]">
                 <span>ราคารวมปกติ:</span>

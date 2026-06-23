@@ -3,7 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import { mockVehicles, mockProducts, mockSlots } from "./src/data/mockData.js";
+import { mockVehicles, mockProducts, mockSlots } from "./src/data/mockData";
 
 // Load environment variables
 dotenv.config();

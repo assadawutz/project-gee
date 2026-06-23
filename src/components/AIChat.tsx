@@ -31,10 +31,10 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
 
   // Quick suggestions
   const suggestions = [
-    "แนะนำฟิตเมนต์ล้อเท่ๆ ขอบ 18 สำหรับ Civic FL5 หน่อยจีจี้",
-    "ยาง Yokohama AD09 กับ Michelin PS4S คอนเซปต่างกันขนาดไหน?",
-    "ตั้งแคมเบอร์หน้า -2.5 ดีกรี วิ่งถนนกินยางข้างในหรือป่าวครับพี่?",
-    "ล้อ ENKEI RPF1 มีข้อดีด้านน้ำหนักและดีไซน์ยังไงบ้างครับ?"
+    "Recommend: แนะนำฟิตเมนต์ล้อเท่ๆ ขอบ 18 สำหรับ Civic FL5 หน่อยจีจี้",
+    "Hot & New: ช่วงนี้มีล้อแม็กหรือยางอะไรกำลังฮิตและมาใหม่บ้าง?",
+    "Review: ล้อ ENKEI RPF1 มีข้อดีด้านน้ำหนักและดีไซน์ยังไง รีวิวให้หน่อย?",
+    "Consultation & AI Suggests: ปรึกษาตั้งแคมเบอร์หน้า -2.5 ดีกรี วิ่งถนนกินยางข้างในหรือป่าว?"
   ];
 
   const handleSendMessage = async (customText?: string) => {

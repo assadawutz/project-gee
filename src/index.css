@@ -16,13 +16,23 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -51,70 +61,166 @@
 
 /* LIGHT MODE ENHANCED POLISHED OVERRIDES */
 .light {
-  --bg-app: #f4f4f5;
+  --bg-app: #f8fafc;
   --bg-card: #ffffff;
-  --border-color: #e4e4e7;
-  --text-primary: #09090b;
-  --text-secondary: #52525b;
+  --bg-offset: #f1f5f9;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --brand-color: #4d7c0f; /* Darker lime for light mode */
 }
 
-.light.bg-[#0a0a0a] {
+/* Base backgrounds */
+.light .bg-zinc-50 {
   background-color: var(--bg-app) !important;
 }
 
-.light .bg-[#0d0d0d] {
+/* Card-like elements */
+.light .bg-\[\#0a0a0a\],
+.light .bg-\[\#0d0d0d\],
+.light .bg-\[\#0c0c0c\],
+.light .bg-\[\#121212\],
+.light .bg-\[\#0b0b0b\],
+.light .bg-\[\#090909\],
+.light .bg-\[\#070707\],
+.light .bg-\[\#050505\],
+.light .bg-zinc-950 {
   background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
 }
 
-.light .bg-[#0c0c0c] {
-  background-color: var(--bg-card) !important;
-  border-color: var(--border-color) !important;
-}
-
-.light .bg-[#0a0a0a]/55,
-.light .bg-[#0a0a0a]/50,
-.light .bg-[#0a0a0a]/40 {
-  background-color: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(8px);
-  border-color: var(--border-color) !important;
-}
-
-.light .bg-zinc-950,
-.light .bg-zinc-950/80,
-.light .bg-zinc-950/40,
-.light .bg-zinc-950/50,
-.light .bg-zinc-950/60 {
-  background-color: #f4f4f5 !important;
-  border-color: var(--border-color) !important;
-}
-
+/* Offset backgrounds / Inputs */
 .light .bg-zinc-900,
-.light .bg-zinc-900/50 {
-  background-color: #e4e4e7 !important;
+.light .bg-zinc-800,
+.light .bg-zinc-700 {
+  background-color: var(--bg-offset) !important;
   border-color: var(--border-color) !important;
 }
 
-.light .text-white,
-.light .text-zinc-100 {
+/* Hover states */
+.light .hover\:bg-zinc-900:hover,
+.light .hover\:bg-zinc-800:hover,
+.light .hover\:bg-zinc-700:hover,
+.light .hover\:bg-zinc-950:hover {
+  background-color: var(--border-color) !important;
+}
+
+/* Translucent backgrounds */
+.light .bg-\[\#0a0a0a\]\/50,
+.light .bg-\[\#0a0a0a\]\/55,
+.light .bg-\[\#0a0a0a\]\/40,
+.light .bg-\[\#0a0a0a\]\/80,
+.light .bg-\[\#0a0a0a\]\/90,
+.light .bg-\[\#0a0a0a\]\/95,
+.light .bg-\[\#0d0d0d\]\/95,
+.light .bg-\[\#121212\]\/95,
+.light .bg-zinc-950\/80,
+.light .bg-zinc-950\/40,
+.light .bg-zinc-950\/50,
+.light .bg-zinc-950\/60,
+.light .bg-zinc-950\/90,
+.light .bg-zinc-900\/50,
+.light .bg-zinc-900\/80 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Primary Brand Color Overrides */
+.light .text-\[\#ccff00\],
+.light .text-lime-400 {
+  color: var(--brand-color) !important;
+}
+
+.light .bg-\[\#ccff00\],
+.light .bg-lime-400 {
+  background-color: #65a30d !important; /* Grounded green */
+  color: #ffffff !important;
+}
+
+.light .border-\[\#ccff00\],
+.light .border-lime-400 {
+  border-color: #65a30d !important;
+}
+
+/* Tinted brand elements */
+.light .bg-\[\#ccff00\]\/5,
+.light .bg-\[\#ccff00\]\/10,
+.light .bg-\[\#ccff00\]\/20,
+.light .bg-\[\#ccff00\]\/25 {
+  background-color: rgba(101, 163, 13, 0.08) !important;
+}
+
+.light .border-\[\#ccff00\]\/30,
+.light .border-\[\#ccff00\]\/20,
+.light .border-\[\#ccff00\]\/40 {
+  border-color: rgba(101, 163, 13, 0.2) !important;
+}
+
+/* Text Hierarchy */
+.light .text-white:not(.rounded-full):not(.rounded) {
   color: var(--text-primary) !important;
 }
 
-.light .text-zinc-200,
-.light .text-zinc-350,
-.light .text-zinc-300 {
-  color: #181c24 !important;
+.light .text-zinc-100,
+.light .text-zinc-200 {
+  color: var(--text-primary) !important;
 }
 
+.light .text-zinc-300,
 .light .text-zinc-400 {
   color: var(--text-secondary) !important;
 }
 
-.light .text-zinc-500 {
-  color: #71717a !important;
+.light .text-zinc-500,
+.light .text-zinc-600 {
+  color: var(--text-muted) !important;
 }
 
+/* Specific fixed colors */
+.light .text-black {
+  color: #000000 !important;
+}
+.light .text-\[\#0a0a0a\] {
+  color: #0f172a !important;
+}
+
+/* Borders */
+.light .border-zinc-700,
 .light .border-zinc-800,
-.light .border-zinc-900 {
+.light .border-zinc-900,
+.light .border-zinc-600 {
   border-color: var(--border-color) !important;
+}
+
+/* Ensure shadows for cards in light mode */
+.light .rounded-xl,
+.light .rounded-2xl {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+}
+
+/* PRINT STYLES FOR ESTIMATE */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+  .print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+    padding: 40px !important;
+  }
+  header,
+  footer,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
 }
