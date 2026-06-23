@@ -11,21 +11,66 @@ import ko2Img from "../assets/images/ko2_tire_1782248731367.jpg";
 import { Vehicle, Product } from "../types";
 
 export const mockVehicles: Vehicle[] = [
-  { id: "v_civic_fe", brand: "Honda", model: "Civic FE", year: "2022", subModel: "RS (1.5 Turbo)", pcd: "5x114.3", cb: "64.1", boltPattern: "M12x1.5", image: civicFeImg },
-  { id: "v_civic_fk", brand: "Honda", model: "Civic FK", year: "2017", subModel: "Type R", pcd: "5x120", cb: "64.1", boltPattern: "M14x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_civic_fc", brand: "Honda", model: "Civic FC", year: "2019", subModel: "RS", pcd: "5x114.3", cb: "64.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_city_gn", brand: "Honda", model: "City GN", year: "2021", subModel: "RS", pcd: "4x100", cb: "56.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_hrv_rv", brand: "Honda", model: "HR-V RV", year: "2023", subModel: "e:HEV", pcd: "5x114.3", cb: "64.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_yaris_nsp152", brand: "Toyota", model: "Yaris", year: "2022", subModel: "NSP152", pcd: "4x100", cb: "54.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_altis_zwe211", brand: "Toyota", model: "Altis", year: "2021", subModel: "ZWE211", pcd: "5x100", cb: "54.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_gr86_zn8", brand: "Toyota", model: "GR86", year: "2023", subModel: "ZN8", pcd: "5x100", cb: "56.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_wrx_vb", brand: "Subaru", model: "WRX", year: "2023", subModel: "VB", pcd: "5x114.3", cb: "56.1", boltPattern: "M12x1.25", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_mazda3_bp", brand: "Mazda", model: "Mazda 3", year: "2022", subModel: "BP", pcd: "5x114.3", cb: "67.1", boltPattern: "M12x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_gtr_r35", brand: "Nissan", model: "GT-R", year: "2023", subModel: "R35", pcd: "5x114.3", cb: "66.1", boltPattern: "M12x1.25", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_almera_n18", brand: "Nissan", model: "Almera", year: "2022", subModel: "N18", pcd: "4x100", cb: "60.1", boltPattern: "M12x1.25", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_m2_g87", brand: "BMW", model: "M2", year: "2023", subModel: "G87", pcd: "5x112", cb: "66.6", boltPattern: "M14x1.25", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_mustang_s650", brand: "Ford", model: "Mustang", year: "2024", subModel: "S650", pcd: "5x114.3", cb: "70.5", boltPattern: "M14x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
-  { id: "v_golfr_mk8", brand: "VW", model: "Golf R", year: "2023", subModel: "MK8", pcd: "5x112", cb: "57.1", boltPattern: "M14x1.5", image: "https://images.unsplash.com/photo-1628157588553-9ee700a10346?w=800" },
+  { 
+    id: "v_civic_fe", 
+    brand: "Honda", 
+    model: "Civic FE", 
+    year: "2022", 
+    subModel: "RS (1.5 Turbo)", 
+    pcd: "5x114.3", 
+    cb: "64.1", 
+    boltPattern: "M12x1.5", 
+    image: civicFeImg,
+    fitment: {
+      front: { x: 26.5, y: 67.5, scale: 22.5 },
+      rear: { x: 74.2, y: 67.5, scale: 22.5 }
+    }
+  },
+  { 
+    id: "v_revo", 
+    brand: "Toyota", 
+    model: "Hilux Revo", 
+    year: "2021", 
+    subModel: "Prerunner", 
+    pcd: "6x139.7", 
+    cb: "106.1", 
+    boltPattern: "M12x1.5", 
+    image: revoImg,
+    fitment: {
+      front: { x: 23.5, y: 65, scale: 26 },
+      rear: { x: 76.5, y: 65, scale: 26 }
+    }
+  },
+  { 
+    id: "v_dmax", 
+    brand: "Isuzu", 
+    model: "D-Max", 
+    year: "2022", 
+    subModel: "V-Cross", 
+    pcd: "6x139.7", 
+    cb: "100.1", 
+    boltPattern: "M12x1.5", 
+    image: dmaxImg,
+    fitment: {
+      front: { x: 23, y: 64, scale: 26.5 },
+      rear: { x: 76, y: 64, scale: 26.5 }
+    }
+  },
+  { 
+    id: "v_fortuner", 
+    brand: "Toyota", 
+    model: "Fortuner", 
+    year: "2023", 
+    subModel: "Legender", 
+    pcd: "6x139.7", 
+    cb: "106.1", 
+    boltPattern: "M12x1.5", 
+    image: fortunerImg,
+    fitment: {
+      front: { x: 24, y: 66, scale: 25 },
+      rear: { x: 76, y: 66, scale: 25 }
+    }
+  }
 ];
 
 export const mockProducts: Product[] = [

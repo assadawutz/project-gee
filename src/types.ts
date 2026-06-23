@@ -8,6 +8,10 @@ export interface Vehicle {
   cb: string; // Center Bore (e.g., 67.1)
   boltPattern: string;
   image: string; // Silhouette / side-view vehicle image for Fitment Simulation
+  fitment?: {
+    front: { x: number; y: number; scale: number };
+    rear: { x: number; y: number; scale: number };
+  };
 }
 
 export type ProductType = "wheel" | "tire" | "part";

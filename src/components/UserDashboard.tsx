@@ -165,15 +165,30 @@ export default function UserDashboard({ user, onLogout }: UserDashboardProps) {
             </h3>
             
             {/* Visual Timeline Tracker */}
-            <div className="flex justify-between items-center mb-8 px-2">
-              {['Processing', 'Preparing', 'Shipping', 'Delivered'].map((step, i) => (
-                <div key={step} className="flex flex-col items-center space-y-2">
-                   <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${i <= 1 ? 'bg-[#ccff00] border-[#ccff00] text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
-                      {i <= 1 ? <ShieldCheck className="w-4 h-4" /> : <div className="w-2 h-2 rounded-full bg-zinc-700" />}
-                   </div>
-                   <span className="text-[8px] font-black uppercase text-zinc-500">{step}</span>
-                </div>
-              ))}
+            <div className="relative mb-12 mt-6 px-4">
+              {/* Timeline Line */}
+              <div className="absolute top-4 left-0 w-full h-0.5 bg-zinc-900 z-0">
+                 <div className="h-full bg-[#ccff00] w-1/3 shadow-[0_0_10px_rgba(204,255,0,0.4)]" />
+              </div>
+              
+              <div className="relative z-10 flex justify-between items-center">
+                {[
+                  { label: 'Processing', date: '20 Oct', icon: Clock },
+                  { label: 'Preparing Goods', date: '21 Oct', icon: Package },
+                  { label: 'Shipping', date: 'Pending', icon: Zap },
+                  { label: 'Delivered', date: 'Pending', icon: ShieldCheck }
+                ].map((step, i) => (
+                  <div key={step.label} className="flex flex-col items-center group">
+                     <div className={`w-9 h-9 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${i <= 1 ? 'bg-[#ccff00] border-[#ccff00] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]' : 'bg-zinc-950 border-zinc-800 text-zinc-600'}`}>
+                        <step.icon className={`w-4 h-4 ${i === 1 ? 'animate-bounce' : ''}`} />
+                     </div>
+                     <div className="mt-3 text-center">
+                        <span className={`text-[9px] font-black uppercase block tracking-widest ${i <= 1 ? 'text-white' : 'text-zinc-600'}`}>{step.label}</span>
+                        <span className="text-[8px] font-bold text-zinc-500 block mt-0.5">{step.date}</span>
+                     </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {user.orders.length > 0 ? (

@@ -78,6 +78,9 @@ export default function FitmentEngine({
   
   // Interaction States
   const [wheelSize, setWheelSize] = useState(18);
+  const [rideHeight, setRideHeight] = useState(0); // Offset in pixels or %
+  const [camber, setCamber] = useState(0); // Degrees
+  const [offset, setOffset] = useState(0); // For deep dish / poke effect
   const [showToast, setShowToast] = useState(false);
   const [isSimulationOpen, setIsSimulationOpen] = useState(false);
   const [quantity, setQuantity] = useState<number>(4);
@@ -107,10 +110,6 @@ export default function FitmentEngine({
   const loyaltyBonus = quantity === 4 ? 2500 : 0;
   const finalDiscount = Math.round(tenPercentOff + loyaltyBonus);
   const finalPayAmount = rawSubTotal - finalDiscount;
-
-  const sizeCompatMsg = selectedWheel?.size === selectedTire?.tireSizeCompat 
-    ? { ok: true, text: `ตรงไซส์พอดีเป๊ะ! (ขอบ ${selectedWheel?.size || 'N/A'} เท่ากัน)` }
-    : { ok: false, text: `ขนาดขอบล้อกับแก้มยางไม่แมทซ์กันเกรงว่าจะใส่ยากครับพี่! (ล้อขอบ ${selectedWheel?.size || 'N/A'} ยางขอบ ${selectedTire?.tireSizeCompat || 'N/A'})` };
 
   // Effects
   useEffect(() => {
@@ -166,44 +165,67 @@ export default function FitmentEngine({
         <div className="flex-1 relative flex flex-col bg-[#050505] p-6">
           <div className="flex items-center justify-between mb-4">
              <span className="text-[10px] font-black uppercase text-zinc-600 tracking-[0.2em]">
-               {selectedVehicle.brand} {selectedVehicle.model} from {selectedVehicle.year}
+               {selectedVehicle.brand} {selectedVehicle.model} {selectedVehicle.subModel}
              </span>
+             <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 bg-zinc-900/50 px-3 py-1.5 rounded-full border border-zinc-800">
+                   <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Wheel Size</span>
+                   <span className="text-[10px] font-black text-[#ccff00]">{wheelSize}"</span>
+                </div>
+             </div>
           </div>
 
-          <div className="flex-1 relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 group">
+          <div className="flex-1 relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 group flex items-center justify-center">
+             {/* Background Layers */}
              <div className="absolute inset-0 z-0">
                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(204,255,0,0.03),transparent_70%)]"></div>
                <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ccff00]/20 to-transparent blur-sm"></div>
                <div className="absolute bottom-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-500/20 to-transparent blur-md"></div>
              </div>
 
-             <div className="absolute inset-0 z-10 flex items-center justify-center p-12">
-                <div className="relative w-full aspect-[16/9]">
-                   <div className="absolute bottom-[18%] left-[10%] right-[10%] h-[8%] bg-black/60 blur-3xl rounded-[100%] z-0" />
+             {/* RENDER ENGINE (Layered 2D) */}
+             <div className="relative w-full max-w-4xl mx-auto p-4 flex items-center justify-center">
+                {/* The core container that wraps the car exactly */}
+                <div className="relative inline-block w-full">
+                   {/* Shadow Layer */}
+                   <div className="absolute bottom-[10%] left-[5%] right-[5%] h-[15%] bg-black/60 blur-3xl rounded-[100%] z-0" />
+                   
+                   {/* Car Layer (Base) */}
                    <img 
                     src={selectedVehicle.image} 
                     alt="Preview Car" 
-                    className="w-full h-full object-contain filter contrast-[1.05] brightness-110 z-10 drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
+                    className="w-full h-auto relative z-10 filter contrast-[1.05] brightness-110 drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
                    />
+
+                   {/* Wheel & Tire Layers (Anchored to Vehicle) */}
                    {(() => {
-                      const cfg = wheelMap[selectedVehicle.id] || { frontWheel: { x: 26, y: 67, scale: 22 }, rearWheel: { x: 74, y: 67, scale: 22 } };
-                      const scaleFactor = 1 + (wheelSize - 18) * 0.025; 
+                      const fit = selectedVehicle.fitment || { 
+                        front: { x: 26.5, y: 67.5, scale: 22.5 }, 
+                        rear: { x: 74.2, y: 67.5, scale: 22.5 } 
+                      };
                       
-                      const renderWheel = (pos: { x: number, y: number, scale: number }) => (
+                      // Calculate scale relative to wheel size (18 is base)
+                      const sizeScale = 1 + (wheelSize - 18) * 0.015; 
+                      
+                      const renderWheel = (pos: { x: number, y: number, scale: number }, type: "front" | "rear") => (
                         <div 
+                          key={type}
                           className="absolute z-20 transition-all duration-700 cubic-bezier(0.23, 1, 0.32, 1)" 
                           style={{ 
                             left: `${pos.x}%`, 
-                            top: `${pos.y}%`, 
-                            width: `${pos.scale * scaleFactor * 1.15}%`,
-                            transform: 'translate(-50%, -50%)'
+                            top: `${pos.y + rideHeight}%`, // Add ride height offset
+                            width: `${pos.scale * sizeScale}%`,
+                            transform: `translate(-50%, -50%) rotate(${camber}deg)`,
+                            marginLeft: type === 'front' ? `${offset}px` : `${offset * 0.8}px` // Mock offset/poke
                           }}
                         >
                            <div className="relative aspect-square">
+                              {/* Tire (Behind Wheel) */}
                               <div className="absolute inset-0 rounded-full bg-[#111] border-[4px] border-zinc-900 shadow-inner overflow-hidden">
-                                 <img src={selectedTire.image} className="w-full h-full object-cover opacity-40 rotate-12 scale-110" alt="Tire" />
+                                 <img src={selectedTire.image} className="w-full h-full object-cover opacity-60 rotate-12 scale-110" alt="Tire" />
                               </div>
-                              <div className="absolute inset-[10%] rounded-full border-2 border-black/20 shadow-2xl overflow-hidden bg-black">
+                              {/* Wheel (Centered) */}
+                              <div className="absolute inset-[10%] rounded-full border-2 border-black/20 shadow-2xl overflow-hidden bg-black group-hover:scale-[1.02] transition-transform">
                                  <img src={selectedWheel.image} className="w-full h-full object-cover filter brightness-[0.9] contrast-[1.15]" alt="Wheel" />
                                  <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-transparent to-white/10" />
                               </div>
@@ -213,19 +235,55 @@ export default function FitmentEngine({
 
                       return (
                         <>
-                          {renderWheel(cfg.frontWheel)}
-                          {renderWheel(cfg.rearWheel)}
+                          {renderWheel(fit.front, "front")}
+                          {renderWheel(fit.rear, "rear")}
                         </>
                       )
                    })()}
                 </div>
              </div>
 
+             {/* SUSPENSION CONTROLS (Floating Overlay) */}
+             <div className="absolute bottom-6 left-6 z-30 w-72 space-y-3">
+                <div className="bg-black/60 backdrop-blur-xl border border-zinc-800 p-5 rounded-2xl">
+                   <div className="flex items-center justify-between mb-4">
+                      <span className="text-[10px] font-black uppercase text-white tracking-widest">Suspension Tune</span>
+                      <Sliders className="w-3.5 h-3.5 text-[#ccff00]" />
+                   </div>
+                   
+                   <div className="space-y-4">
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500">
+                            <span>Ride Height</span>
+                            <span className="text-[#ccff00]">{rideHeight}mm</span>
+                         </div>
+                         <input 
+                           type="range" min="-5" max="5" step="0.1" value={rideHeight}
+                           onChange={(e) => setRideHeight(Number(e.target.value))}
+                           className="w-full accent-[#ccff00] h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer"
+                         />
+                      </div>
+
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500">
+                            <span>Negative Camber</span>
+                            <span className="text-[#ccff00]">{camber}°</span>
+                         </div>
+                         <input 
+                           type="range" min="-10" max="0" step="0.5" value={camber}
+                           onChange={(e) => setCamber(Number(e.target.value))}
+                           className="w-full accent-[#ccff00] h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer"
+                         />
+                      </div>
+                   </div>
+                </div>
+             </div>
+
              <button 
                onClick={() => setIsSimulationOpen(true)}
-               className="absolute bottom-6 right-6 z-30 h-12 w-12 bg-[#ccff00] text-black rounded-full flex items-center justify-center shadow-lg shadow-[#ccff00]/20 hover:scale-110 transition-transform active:scale-95"
+               className="absolute bottom-6 right-6 z-30 h-14 w-14 bg-[#ccff00] text-black rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ccff00]/20 hover:scale-110 transition-all active:scale-95 group"
              >
-                <Maximize2 className="w-5 h-5" />
+                <Maximize2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
              </button>
           </div>
         </div>
@@ -249,22 +307,22 @@ export default function FitmentEngine({
                 <section className="space-y-4">
                   <div className="flex items-center justify-between">
                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center space-x-2">
-                        <span className="w-1.5 h-1.5 bg-[#ccff00] rounded-full"></span>
-                        <span>Car System</span>
+                        <span className="w-1.5 h-1.5 bg-[#ccff00] rounded-full animate-pulse"></span>
+                        <span>Vehicle Selection</span>
                      </h3>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
-                     {filteredVehicles.map(v => (
+                  <div className="grid grid-cols-2 gap-3">
+                     {vehicles.map(v => (
                        <button
                         key={v.id}
                         onClick={() => setSelectedVehicle(v)}
-                        className={`aspect-[4/3] rounded-2xl border-2 overflow-hidden transition-all relative group flex items-center justify-center p-2 ${
+                        className={`aspect-[16/10] rounded-2xl border-2 overflow-hidden transition-all relative group flex items-center justify-center p-3 ${
                           selectedVehicle.id === v.id ? "border-[#ccff00] bg-zinc-900 shadow-xl shadow-[#ccff00]/10" : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
                         }`}
                        >
                          <img src={v.image} className="w-full h-full object-contain filter contrast-[1.05]" alt={v.model} />
-                         <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black to-transparent">
-                            <p className="text-[8px] font-black text-white truncate text-center">{v.brand} {v.model}</p>
+                         <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black to-transparent">
+                            <p className="text-[9px] font-black text-white truncate text-center leading-none uppercase tracking-tighter">{v.brand} {v.model}</p>
                          </div>
                        </button>
                      ))}
@@ -295,7 +353,7 @@ export default function FitmentEngine({
                       key={p.id}
                       onClick={() => activeProductType === 'wheel' ? setSelectedWheel(p) : activeProductType === 'tire' ? setSelectedTire(p) : null}
                       role="button"
-                      className={`group relative rounded-3xl border-2 overflow-hidden transition-all flex flex-col bg-zinc-950 cursor-pointer outline-none ${
+                      className={`group relative rounded-[2rem] border-2 overflow-hidden transition-all flex flex-col bg-zinc-950 cursor-pointer outline-none ${
                         (activeProductType === 'wheel' ? selectedWheel.id === p.id : selectedTire.id === p.id) ? "border-[#ccff00] shadow-[0_0_40px_rgba(204,255,0,0.15)]" : "border-zinc-800/80 hover:border-zinc-700"
                       }`}
                     >
@@ -307,13 +365,26 @@ export default function FitmentEngine({
                           />
                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.6)_100%)]" />
                        </div>
-                       <div className="p-4 text-left">
+                       <div className="p-5 text-left relative">
+                          <button 
+                            className="absolute top-4 right-4 p-1.5 bg-zinc-900/80 rounded-lg hover:bg-[#ccff00] hover:text-black transition-all group/bell"
+                            title="Subscribe to Price Drop"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert("เราจะส่งอีเมลแจ้งเตือนให้ทันทีที่ราคาลดลงครับพี่!");
+                            }}
+                          >
+                             <Bell className="w-3 h-3" />
+                          </button>
                           <span className="text-[8px] font-black uppercase text-[#ccff00] block tracking-widest mb-1">{p.brand}</span>
-                          <h4 className="text-[11px] font-black uppercase text-white truncate leading-tight">
+                          <h4 className="text-[11px] font-black uppercase text-white truncate leading-tight mb-4">
                             {p.name}
                           </h4>
-                          <div className="flex items-center justify-between mt-3">
-                             <span className="text-sm font-black text-white">{p.price.toLocaleString()} ฿</span>
+                          <div className="flex items-center justify-between">
+                             <span className="text-sm font-black text-white italic tracking-tighter">{p.price.toLocaleString()} ฿</span>
+                             <div className="h-6 w-6 bg-zinc-900 rounded-lg flex items-center justify-center group-hover:bg-[#ccff00] transition-colors">
+                                <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-black transition-colors" />
+                             </div>
                           </div>
                        </div>
                     </div>
@@ -336,9 +407,9 @@ export default function FitmentEngine({
                 </div>
                 <button 
                   onClick={() => activeProductType === 'bundle' ? onAddBundleToCart?.(selectedWheel, selectedTire, quantity, finalDiscount) : onAddToCart?.(selectedWheel)}
-                  className="px-8 h-16 bg-[#ccff00] hover:bg-lime-400 text-black rounded-2xl flex items-center space-x-3 transition-all transform active:scale-95 shadow-2xl shadow-[#ccff00]/20"
+                  className="px-10 h-16 bg-[#ccff00] hover:bg-lime-400 text-black rounded-2xl flex items-center space-x-3 transition-all transform active:scale-95 shadow-2xl shadow-[#ccff00]/20"
                 >
-                   <span className="text-xs font-black uppercase tracking-widest">Add to Quote</span>
+                   <span className="text-xs font-black uppercase tracking-[0.2em]">Add to Quote</span>
                    <ArrowRight className="w-5 h-5" />
                 </button>
              </div>

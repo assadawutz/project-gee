@@ -49,8 +49,8 @@ export default function VirtualFitment({
   // Interaction States
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isCalibrating, setIsCalibrating] = useState(false);
-  const [frontPos, setFrontPos] = useState(config.frontWheel);
-  const [rearPos, setRearPos] = useState(config.rearWheel);
+  const [frontPos, setFrontPos] = useState(selectedVehicle.fitment?.front || { x: 26.5, y: 67.5, scale: 22.5 });
+  const [rearPos, setRearPos] = useState(selectedVehicle.fitment?.rear || { x: 74.2, y: 67.5, scale: 22.5 });
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const toggleCamera = async () => {
@@ -72,28 +72,32 @@ export default function VirtualFitment({
   };
 
   useEffect(() => {
-    setFrontPos(config.frontWheel);
-    setRearPos(config.rearWheel);
-  }, [selectedVehicle, config]);
+    if (selectedVehicle.fitment) {
+      setFrontPos(selectedVehicle.fitment.front);
+      setRearPos(selectedVehicle.fitment.rear);
+    }
+  }, [selectedVehicle]);
 
   const handleCapture = () => {
     console.log("Photo saved to gallery! (Simulation)");
   };
 
-  const renderWheelCombo = (pos: { x: number, y: number, scale: number }, side: 'front' | 'rear') => {
+  const renderWheelCombo = (pos: { x: number, y: number, scale: number }, type: 'front' | 'rear') => {
     if (!selectedTire || !selectedWheel) return null;
     
     // Tire scale is wheel scale + sidewall
-    const tireScaleFactor = (wheelSizeScale / 100) * (1 + sidewallHeight / 300);
+    const baseScale = pos.scale * (wheelSizeScale / 100);
+    const tireScaleFactor = 1 + sidewallHeight / 300;
     const tireWidthFactor = 1 + tireStretch / 200;
 
     return (
       <motion.div
+        key={type}
         className="absolute z-30"
         style={{
           left: `${pos.x}%`,
           top: `${pos.y + (suspensionGap / 8)}%`,
-          width: `${pos.scale * tireScaleFactor}%`,
+          width: `${baseScale * tireScaleFactor}%`,
           transform: `translate(-50%, -50%) rotate(${camberAngle}deg)`,
           perspective: '1000px'
         }}
@@ -126,7 +130,7 @@ export default function VirtualFitment({
           {/* Wheel Layer (Centered inside Tire) */}
           <div 
             className="relative aspect-square rounded-full border-[3px] border-zinc-800/50 shadow-2xl overflow-hidden bg-black flex items-center justify-center transition-transform duration-300"
-            style={{ transform: `scale(${1 / (1 + sidewallHeight / 350)})` }}
+            style={{ transform: `scale(${1 / tireScaleFactor})` }}
           >
             <img 
               src={selectedWheel.image} 
@@ -161,12 +165,12 @@ export default function VirtualFitment({
         {/* HUD Elements */}
         <div className="absolute top-6 left-6 z-40 flex flex-col space-y-1">
           <h2 className="text-white font-black text-2xl uppercase tracking-tighter italic">
-            Fitment<span className="text-[#ccff00]">Engine</span> v2.0
+            Fitment<span className="text-[#ccff00]">Engine</span> v3.0
           </h2>
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse"></span>
             <span className="text-[10px] text-zinc-500 font-mono uppercase font-bold tracking-widest">
-              Live Rendering Active // {selectedVehicle.brand} {selectedVehicle.model}
+              Anchored Coordinate Mapping // {selectedVehicle.brand} {selectedVehicle.model}
             </span>
           </div>
         </div>
@@ -197,72 +201,64 @@ export default function VirtualFitment({
         )}
 
         {/* RENDER STAGE */}
-        <div className="relative flex-1 flex items-center justify-center p-2 sm:p-6 lg:p-12">
-          <div className="relative w-full max-w-5xl aspect-[4/3] sm:aspect-[16/9]">
-            
-            {/* 1. Ground Shadows Layer */}
-            <div 
-              className="absolute z-10 blur-2xl opacity-40 transition-all duration-700 pointer-events-none"
-              style={{
-                left: '10%',
-                right: '10%',
-                top: `${config.shadowY}%`,
-                height: '8%',
-                backgroundColor: carColor,
-                borderRadius: '100%',
-              }}
-            />
-            <div 
-              className="absolute z-10 bg-black/60 blur-xl opacity-80 pointer-events-none"
-              style={{
-                left: '5%',
-                right: '5%',
-                top: `${config.shadowY + 1}%`,
-                height: '6%',
-                borderRadius: '100%',
-              }}
-            />
+        <div className="relative flex-1 flex items-center justify-center p-2 sm:p-6 lg:p-12 z-20">
+          <div className="relative w-full max-w-5xl">
+            {/* The core container that wraps the car exactly */}
+            <div className="relative inline-block w-full">
+              {/* Shadow Layer */}
+              <div 
+                className="absolute z-10 blur-2xl opacity-40 transition-all duration-700 pointer-events-none"
+                style={{
+                  left: '10%',
+                  right: '10%',
+                  bottom: '10%',
+                  height: '8%',
+                  backgroundColor: carColor,
+                  borderRadius: '100%',
+                }}
+              />
+              
+              {/* Car Body Layer */}
+              <motion.div 
+                className="relative z-20 pointer-events-none"
+                style={{ transform: `translateY(${suspensionGap / 4}px)` }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+              >
+                <div className="relative w-full h-full">
+                  {/* Car Color Tint Layer */}
+                  <div 
+                    className="absolute inset-0 z-10 mix-blend-multiply opacity-50 pointer-events-none transition-colors duration-1000"
+                    style={{ 
+                      backgroundColor: carColor,
+                      maskImage: `url(${selectedVehicle.image})`,
+                      WebkitMaskImage: `url(${selectedVehicle.image})`,
+                      maskSize: 'contain',
+                      WebkitMaskSize: 'contain',
+                      maskRepeat: 'no-repeat',
+                      WebkitMaskRepeat: 'no-repeat',
+                      maskPosition: 'center',
+                      WebkitMaskPosition: 'center'
+                    }}
+                  />
+                  <img 
+                    src={selectedVehicle.image} 
+                    alt="Car" 
+                    className="w-full h-auto filter drop-shadow-[0_30px_60px_rgba(0,0,0,0.8)] brightness-105 contrast-110" 
+                  />
+                </div>
+              </motion.div>
 
-            {/* 2. Car Body Layer */}
-            <motion.div 
-              className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
-              style={{ transform: `translateY(${suspensionGap / 4}px)` }}
-              transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            >
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* Car Color Tint Layer */}
-                <div 
-                  className="absolute inset-0 z-10 mix-blend-multiply opacity-50 pointer-events-none transition-colors duration-1000"
-                  style={{ 
-                    backgroundColor: carColor,
-                    maskImage: `url(${selectedVehicle.image})`,
-                    WebkitMaskImage: `url(${selectedVehicle.image})`,
-                    maskSize: 'contain',
-                    WebkitMaskSize: 'contain',
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskPosition: 'center',
-                    WebkitMaskPosition: 'center'
-                  }}
-                />
-                <img 
-                  src={selectedVehicle.image} 
-                  alt="Car" 
-                  className="w-full h-full object-contain filter drop-shadow-[0_30px_60px_rgba(0,0,0,0.8)] brightness-105 contrast-110" 
-                />
-              </div>
-            </motion.div>
+              {/* 3. Wheels & Tires Layer (Anchored to Car Image) */}
+              {renderWheelCombo(frontPos, 'front')}
+              {renderWheelCombo(rearPos, 'rear')}
 
-            {/* 3. Wheels & Tires Layer */}
-            {renderWheelCombo(frontPos, 'front')}
-            {renderWheelCombo(rearPos, 'rear')}
-
-            {/* Calibration Overlay */}
-            {isCalibrating && (
-              <div className="absolute inset-0 z-50 pointer-events-none">
-                 <div className="absolute inset-0 border-2 border-dashed border-[#ccff00]/30 animate-pulse"></div>
-              </div>
-            )}
+              {/* Calibration Overlay */}
+              {isCalibrating && (
+                <div className="absolute inset-0 z-50 pointer-events-none">
+                   <div className="absolute inset-0 border-2 border-dashed border-[#ccff00]/30 animate-pulse"></div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -282,7 +278,7 @@ export default function VirtualFitment({
              <div className="h-2 w-32 bg-zinc-900 rounded-full overflow-hidden">
                 <div className="h-full bg-[#ccff00]" style={{ width: '92%' }}></div>
              </div>
-             <span className="text-zinc-500 font-mono text-[9px] uppercase font-bold tracking-widest">SYNC OK</span>
+             <span className="text-zinc-500 font-mono text-[9px] uppercase font-bold tracking-widest">COORDS SYNCED</span>
           </div>
         </div>
       </div>

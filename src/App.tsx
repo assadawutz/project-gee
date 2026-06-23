@@ -30,6 +30,8 @@ import {
   Bell,
   Mail,
   User,
+  QrCode,
+  Smartphone,
 } from "lucide-react";
 
 export default function App() {
@@ -191,6 +193,7 @@ export default function App() {
   // Simulated Stripe Checkout Modal states
   const [checkoutOpen, setCheckoutOpen] = useState<boolean>(false);
   const [checkoutStep, setCheckoutStep] = useState<1 | 2>(1); // 1: Card info, 2: Success
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "qr">("card");
   const [checkoutPayload, setCheckoutPayload] = useState({
     cardName: "",
     cardNumber: "4111 2222 3333 4444",
@@ -595,8 +598,39 @@ export default function App() {
               ✕
             </button>
 
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-sans font-black text-xl uppercase italic text-white leading-none">
+                  Secure <span className="text-[#ccff00]">Checkout</span>
+                </h2>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                  Powered by Stripe Gateway // GEE CO.
+                </p>
+              </div>
+            </div>
+
+            {/* Payment Method Tabs */}
+            <div className="flex space-x-2">
+               <button 
+                onClick={() => setPaymentMethod("card")}
+                className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "card" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
+               >
+                  <CreditCard className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Card</span>
+               </button>
+               <button 
+                onClick={() => setPaymentMethod("qr")}
+                className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "qr" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
+               >
+                  <QrCode className="w-4 h-4" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">PromptPay</span>
+               </button>
+            </div>
+
             {checkoutStep === 1 ? (
-              <form onSubmit={handleCheckoutSubmit} className="space-y-5">
+              paymentMethod === "card" ? (
+                <form onSubmit={handleCheckoutSubmit} className="space-y-5">
                 <div className="border-b border-zinc-900 pb-3">
                   <span className="text-[10px] uppercase font-black text-[#ccff00] tracking-widest">
                     STRIPE GATEWAY BINDING
@@ -793,6 +827,43 @@ export default function App() {
                 </div>
               </form>
             ) : (
+              <div className="space-y-6 py-4 flex flex-col items-center">
+                 <div className="p-6 bg-white rounded-2xl shadow-xl shadow-[#ccff00]/10 border-4 border-zinc-900">
+                    <QrCode className="w-48 h-48 text-black" />
+                    <div className="mt-4 flex items-center justify-center space-x-2 text-black">
+                       <Smartphone className="w-4 h-4" />
+                       <span className="text-[10px] font-black uppercase tracking-widest">Scan to Pay</span>
+                    </div>
+                 </div>
+
+                 <div className="text-center space-y-2">
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Total Amount to Pay</p>
+                    <p className="text-3xl font-black italic text-[#ccff00] tracking-tighter">{netCheckoutAmount.toLocaleString()} ฿</p>
+                 </div>
+
+                 <div className="w-full space-y-3 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+                    <div className="flex justify-between items-center text-[10px]">
+                       <span className="text-zinc-500 font-bold uppercase">Account Name:</span>
+                       <span className="text-white font-black">GEE FITMENT CO., LTD.</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px]">
+                       <span className="text-zinc-500 font-bold uppercase">Bank:</span>
+                       <span className="text-white font-black">KASIKORNBANK (K-BANK)</span>
+                    </div>
+                 </div>
+
+                 <button
+                    onClick={() => {
+                      showToast("ชำระเงินสำเร็จผ่าน QR เรียบร้อย!", "success");
+                      setCheckoutStep(2);
+                    }}
+                    className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-lime-400 transition-all"
+                  >
+                    I HAVE PAID (แจ้งชำระเงิน)
+                  </button>
+              </div>
+            )
+          ) : (
               <div className="text-center py-6 space-y-4 animate-fade-in">
                 <CheckCircle2 className="mx-auto w-12 h-12 text-[#ccff00]" />
                 <div>
