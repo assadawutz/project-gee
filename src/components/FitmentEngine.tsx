@@ -219,15 +219,23 @@ export default function FitmentEngine({
                             marginLeft: type === 'front' ? `${offset}px` : `${offset * 0.8}px` // Mock offset/poke
                           }}
                         >
-                           <div className="relative aspect-square">
+                            <div className="relative aspect-square group">
+                              {/* Brake Rotor / Hub Layer */}
+                              <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-zinc-600 to-zinc-800 shadow-inner z-0 opacity-80" />
+                              
                               {/* Tire (Behind Wheel) */}
-                              <div className="absolute inset-0 rounded-full bg-[#111] border-[4px] border-zinc-900 shadow-inner overflow-hidden">
+                              <div className="absolute inset-0 rounded-full bg-[#111] border-[4px] border-zinc-900 shadow-inner overflow-hidden z-10">
                                  <img src={selectedTire.image} className="w-full h-full object-cover opacity-60 rotate-12 scale-110" alt="Tire" />
                               </div>
+                              
                               {/* Wheel (Centered) */}
-                              <div className="absolute inset-[10%] rounded-full border-2 border-black/20 shadow-2xl overflow-hidden bg-black group-hover:scale-[1.02] transition-transform">
-                                 <img src={selectedWheel.image} className="w-full h-full object-cover filter brightness-[0.9] contrast-[1.15]" alt="Wheel" />
-                                 <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-transparent to-white/10" />
+                              <div className="absolute inset-[10%] rounded-full border-2 border-black/20 shadow-2xl overflow-hidden bg-black group-hover:scale-[1.02] transition-transform z-20">
+                                 <img src={selectedWheel.image} className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.1] grayscale-[0.1]" alt="Wheel" />
+                                 
+                                 {/* Center Cap / Hub Hole Shadow */}
+                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-black/80 rounded-full blur-[2px] z-30 shadow-inner" />
+                                 
+                                 <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-transparent to-white/5" />
                               </div>
                            </div>
                         </div>

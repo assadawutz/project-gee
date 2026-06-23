@@ -132,14 +132,21 @@ export default function VirtualFitment({
             className="relative aspect-square rounded-full border-[3px] border-zinc-800/50 shadow-2xl overflow-hidden bg-black flex items-center justify-center transition-transform duration-300"
             style={{ transform: `scale(${1 / tireScaleFactor})` }}
           >
+            {/* Inner Hub Shadow */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.8)_100%)] z-10 pointer-events-none" />
+
             <img 
               src={selectedWheel.image} 
               className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.15]" 
               style={{ transform: `rotateY(${-camberAngle * 2}deg)` }}
               alt="Wheel" 
             />
+
+            {/* Center Hub / Cap Shadow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-black/90 rounded-full blur-[2px] z-20 shadow-inner border border-white/5" />
+
             {/* Wheel Lighting Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-transparent to-white/10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-transparent to-white/5 z-30" />
           </div>
         </div>
       </motion.div>
