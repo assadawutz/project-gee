@@ -48,6 +48,9 @@ export default function VirtualFitment({
 
   // Interaction States
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isCalibrating, setIsCalibrating] = useState(false);
+  const [frontPos, setFrontPos] = useState(config.frontWheel);
+  const [rearPos, setRearPos] = useState(config.rearWheel);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const toggleCamera = async () => {
