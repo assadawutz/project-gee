@@ -161,8 +161,8 @@ export default function VirtualFitment({
         </div>
 
         {/* RENDER STAGE */}
-        <div className="relative flex-1 flex items-center justify-center p-4 lg:p-12">
-          <div className="relative w-full max-w-5xl aspect-[16/9]">
+        <div className="relative flex-1 flex items-center justify-center p-2 sm:p-6 lg:p-12">
+          <div className="relative w-full max-w-5xl aspect-[4/3] sm:aspect-[16/9]">
             
             {/* 1. Ground Shadows Layer */}
             <div 

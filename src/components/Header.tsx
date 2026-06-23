@@ -155,7 +155,7 @@ export default function Header({
           }}
           whileHover="hover"
         >
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0a0a0a] p-1.5 ring-2 ring-[#ccff00] shadow-[0_0_25px_rgba(204,255,0,0.2)] overflow-hidden">
+          <div className="relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl bg-[#0a0a0a] p-1 sm:p-1.5 ring-2 ring-[#ccff00] shadow-[0_0_20px_rgba(204,255,0,0.2)] overflow-hidden">
             <motion.div
               variants={{
                 hover: {
@@ -183,19 +183,19 @@ export default function Header({
 
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-sans font-black tracking-tighter text-3xl uppercase italic text-white flex items-center">
+              <span className="font-sans font-black tracking-tighter text-xl sm:text-3xl uppercase italic text-white flex items-center">
                 GEE
               </span>
               <motion.span
                 initial={{ scale: 0.9 }}
                 animate={{ scale: [0.9, 1.05, 0.9] }}
                 transition={{ repeat: Infinity, duration: 3 }}
-                className="rounded-full bg-[#ccff00] px-2 py-0.5 text-[10px] font-black uppercase text-[#0a0a0a] tracking-wider"
+                className="rounded-full bg-[#ccff00] px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[10px] font-black uppercase text-[#0a0a0a] tracking-wider"
               >
                 PRO
               </motion.span>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 group-hover:text-[#ccff00] transition-colors">
+            <p className="hidden sm:block text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 group-hover:text-[#ccff00] transition-colors">
               Fitment Systems
             </p>
           </div>
