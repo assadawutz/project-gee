@@ -94,7 +94,7 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
       {/* Title block */}
       <div className="rounded-2xl border border-zinc-800 bg-[#0a0a0a]/50 p-6 md:p-8 backdrop-blur-md">
         <h2 className="font-sans font-black tracking-tight text-2xl md:text-3xl uppercase italic text-white flex items-center space-x-2.5">
-          <Bot className="w-8 h-8 text-[#ccff00]" />
+          <Bot className="w-8 h-8 text-[#ff3300]" />
           <span>Gee Lil-Racing AI Assistant</span>
         </h2>
         <p className="mt-2 text-sm text-zinc-400 font-medium">
@@ -110,10 +110,10 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
           {/* Header Diagnostic */}
           <div className="border-b border-zinc-900 pb-2.5 flex items-center justify-between text-zinc-500 font-mono text-[9px]">
             <div className="flex items-center space-x-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ccff00] animate-ping"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ff3300] animate-ping"></span>
               <span>CLIENT BINDING: WEB SOCKET & REST SECURE PROXY ON</span>
             </div>
-            <span>ENGINE: <strong className="text-[#ccff00]">{activeModelMode}</strong></span>
+            <span>ENGINE: <strong className="text-[#ff3300]">{activeModelMode}</strong></span>
           </div>
 
           {/* Messages Container Area */}
@@ -128,7 +128,7 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
                 >
                   <div className={`max-w-[85%] rounded-2xl p-4 text-xs font-semibold leading-relaxed space-y-1 ${
                     isUser 
-                      ? 'bg-[#ccff00] text-[#0a0a0a] rounded-tr-none' 
+                      ? 'bg-[#ff3300] text-[#0a0a0a] rounded-tr-none' 
                       : 'bg-zinc-950 border border-zinc-900 text-zinc-200 rounded-tl-none whitespace-pre-wrap'
                   }`}>
                     
@@ -148,7 +148,7 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
             {loading && (
               <div className="flex justify-start items-center space-x-2">
                 <div className="bg-zinc-950 border border-zinc-900 rounded-xl rounded-tl-none p-3 text-xs flex items-center space-x-2.5 text-zinc-500">
-                  <Disc className="w-4 h-4 text-[#ccff00] animate-spin" />
+                  <Disc className="w-4 h-4 text-[#ff3300] animate-spin" />
                   <span>จีจี้กำลังเจาะสเปกออฟเซ็ต คาดยางให้ด่วนจี๋...</span>
                 </div>
               </div>
@@ -166,12 +166,12 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleSendMessage();
               }}
-              className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-xs font-semibold text-white focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] outline-none"
+              className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-xs font-semibold text-white focus:border-[#ff3300] focus:ring-1 focus:ring-[#ff3300] outline-none"
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={loading}
-              className="p-3 bg-[#ccff00] text-[#0a0a0a] rounded-xl font-bold hover:bg-lime-400 disabled:opacity-40"
+              className="p-3 bg-[#ff3300] text-[#0a0a0a] rounded-xl font-bold hover:bg-[#ff4500] disabled:opacity-40"
               aria-label="ส่งข้อความ"
             >
               <Send className="w-4 h-4" />
@@ -183,7 +183,7 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
         {/* Suggested Quick Prompt list - Right 4 Units */}
         <div className="lg:col-span-4 rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-5 space-y-4">
           <div className="border-b border-zinc-900 pb-2.5 flex items-center space-x-2 text-white">
-            <HelpCircle className="w-4 h-4 text-[#ccff00]" />
+            <HelpCircle className="w-4 h-4 text-[#ff3300]" />
             <h3 className="font-sans font-black text-xs uppercase tracking-wider">คำถามตรงเป้าเจายางซิ่ง</h3>
           </div>
 
@@ -193,7 +193,7 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
                 <button
                   onClick={() => handleSendMessage(s)}
                   disabled={loading}
-                  className="w-full p-3 rounded-xl border border-zinc-900 bg-zinc-950/40 text-left hover:bg-zinc-950 hover:border-[#ccff00]/40 duration-200 transition-all text-xs font-semibold text-zinc-400 group-hover:text-white"
+                  className="w-full p-3 rounded-xl border border-zinc-900 bg-zinc-950/40 text-left hover:bg-zinc-950 hover:border-[#ff3300]/40 duration-200 transition-all text-xs font-semibold text-zinc-400 group-hover:text-white"
                 >
                   <p className="text-zinc-400 hover:text-white leading-normal truncate">{s}</p>
                 </button>
@@ -203,7 +203,7 @@ export default function AIChat({ onTrackAction }: AIChatProps) {
 
           {/* Custom micro rating alert info */}
           <div className="rounded-xl border border-zinc-900 bg-zinc-950/80 p-4 text-[10px] text-zinc-500 font-mono space-y-1.5">
-            <p className="font-sans font-black text-[11px] text-[#ccff00] uppercase mb-1 flex items-center">
+            <p className="font-sans font-black text-[11px] text-[#ff3300] uppercase mb-1 flex items-center">
               <Flame className="w-3.5 h-3.5 mr-1" /> JDM Expert Guide:
             </p>
             <p>1. ค้นหาค่า Offset ET ดึกยางเพื่อหลบซับถังพับโช้คแถมสเกลวงล้อสมรรถนะสูง</p>

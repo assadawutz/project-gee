@@ -29,6 +29,7 @@ import {
 import { Vehicle, Product } from "../types";
 import { mockVehicles, mockProducts } from "../data/mockData";
 import VirtualFitment from "./VirtualFitment";
+import ReviewSection from "./ReviewSection";
 import { wheelMap } from "../data/fitmentConfig";
 import civicFeImg from "../assets/images/civic_fe_profile_1782248647242.jpg";
 import revoImg from "../assets/images/revo_profile_1782248660310.jpg";
@@ -54,6 +55,7 @@ interface FitmentEngineProps {
   onTrackAction?: (event: string) => void;
   wishlist?: Product[];
   onToggleWishlist?: (p: Product) => void;
+  onUpdateProduct?: (p: Product) => void;
 }
 
 export default function FitmentEngine({
@@ -67,6 +69,7 @@ export default function FitmentEngine({
   onTrackAction,
   wishlist = [],
   onToggleWishlist,
+  onUpdateProduct,
 }: FitmentEngineProps) {
   // Global States
   const [activeSegment, setActiveSegment] = useState("sedan");
@@ -84,6 +87,7 @@ export default function FitmentEngine({
   const [rideHeight, setRideHeight] = useState(0); 
   const [camber, setCamber] = useState(0); 
   const [offset, setOffset] = useState(0);
+  const [viewProduct, setViewProduct] = useState<Product | null>(null);
 
   const applySuspensionPreset = (preset: "stock" | "lowered" | "stanced") => {
     setActiveSuspensionPreset(preset);
@@ -152,7 +156,7 @@ export default function FitmentEngine({
       <header className="h-16 flex items-center justify-between px-6 border-b border-zinc-900 bg-black/80 backdrop-blur-md z-50">
         <div className="flex items-center space-x-2">
           <h1 className="text-xl font-black tracking-tighter">
-            <span className="text-[#ccff00]">WHEEL</span>HAUS
+            <span className="text-[#ff3300]">WHEEL</span>HAUS
             <span className="mx-2 text-zinc-700">|</span>
             <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Premium Tire & Wheel Thailand 2025</span>
           </h1>
@@ -160,13 +164,13 @@ export default function FitmentEngine({
 
         <div className="flex items-center space-x-4">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-[#ccff00] transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-[#ff3300] transition-colors" />
             <input 
               type="text" 
               placeholder="Search specs/bundle..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64 bg-zinc-900/50 border border-zinc-800 rounded-full py-2 pl-10 pr-4 text-xs font-medium focus:outline-none focus:border-[#ccff00]/50 focus:ring-1 focus:ring-[#ccff00]/20 transition-all"
+              className="w-64 bg-zinc-900/50 border border-zinc-800 rounded-full py-2 pl-10 pr-4 text-xs font-medium focus:outline-none focus:border-[#ff3300]/50 focus:ring-1 focus:ring-[#ff3300]/20 transition-all"
             />
           </div>
           <button className="p-2 bg-zinc-900 rounded-full hover:bg-zinc-800 transition-colors border border-zinc-800">
@@ -186,7 +190,7 @@ export default function FitmentEngine({
              <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2 bg-zinc-900/50 px-3 py-1.5 rounded-full border border-zinc-800">
                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Wheel Size</span>
-                   <span className="text-[10px] font-black text-[#ccff00]">{wheelSize}"</span>
+                   <span className="text-[10px] font-black text-[#ff3300]">{wheelSize}"</span>
                 </div>
              </div>
           </div>
@@ -194,8 +198,8 @@ export default function FitmentEngine({
           <div className="flex-1 relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 group flex items-center justify-center">
              {/* Background Layers */}
              <div className="absolute inset-0 z-0">
-               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(204,255,0,0.03),transparent_70%)]"></div>
-               <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ccff00]/20 to-transparent blur-sm"></div>
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,51,0,0.03),transparent_70%)]"></div>
+               <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#ff3300]/20 to-transparent blur-sm"></div>
                <div className="absolute bottom-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-purple-500/20 to-transparent blur-md"></div>
              </div>
 
@@ -272,7 +276,7 @@ export default function FitmentEngine({
                 <div className="bg-black/60 backdrop-blur-xl border border-zinc-800 p-5 rounded-2xl">
                    <div className="flex items-center justify-between mb-4">
                       <span className="text-[10px] font-black uppercase text-white tracking-widest">Suspension Tune</span>
-                      <Sliders className="w-3.5 h-3.5 text-[#ccff00]" />
+                      <Sliders className="w-3.5 h-3.5 text-[#ff3300]" />
                    </div>
                    
                    <div className="flex gap-1 mb-4 p-1 bg-zinc-900/50 rounded-lg">
@@ -280,7 +284,7 @@ export default function FitmentEngine({
                         <button 
                           key={p}
                           onClick={() => applySuspensionPreset(p)}
-                          className={`flex-1 py-1.5 text-[8px] font-black uppercase rounded-md transition-all ${activeSuspensionPreset === p ? 'bg-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
+                          className={`flex-1 py-1.5 text-[8px] font-black uppercase rounded-md transition-all ${activeSuspensionPreset === p ? 'bg-[#ff3300] text-black shadow-[0_0_15px_rgba(255,51,0,0.3)]' : 'text-zinc-500 hover:text-zinc-300'}`}
                         >
                           {p}
                         </button>
@@ -291,24 +295,24 @@ export default function FitmentEngine({
                       <div className="space-y-2">
                          <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500">
                             <span>Ride Height</span>
-                            <span className="text-[#ccff00]">{rideHeight}mm</span>
+                            <span className="text-[#ff3300]">{rideHeight}mm</span>
                          </div>
                          <input 
                            type="range" min="-5" max="5" step="0.1" value={rideHeight}
                            onChange={(e) => setRideHeight(Number(e.target.value))}
-                           className="w-full accent-[#ccff00] h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer"
+                           className="w-full accent-[#ff3300] h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer"
                          />
                       </div>
 
                       <div className="space-y-2">
                          <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500">
                             <span>Negative Camber</span>
-                            <span className="text-[#ccff00]">{camber}°</span>
+                            <span className="text-[#ff3300]">{camber}°</span>
                          </div>
                          <input 
                            type="range" min="-10" max="0" step="0.5" value={camber}
                            onChange={(e) => setCamber(Number(e.target.value))}
-                           className="w-full accent-[#ccff00] h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer"
+                           className="w-full accent-[#ff3300] h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer"
                          />
                       </div>
                    </div>
@@ -317,7 +321,7 @@ export default function FitmentEngine({
 
              <button 
                onClick={() => setIsSimulationOpen(true)}
-               className="absolute bottom-6 right-6 z-30 h-14 w-14 bg-[#ccff00] text-black rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ccff00]/20 hover:scale-110 transition-all active:scale-95 group"
+               className="absolute bottom-6 right-6 z-30 h-14 w-14 bg-[#ff3300] text-black rounded-2xl flex items-center justify-center shadow-2xl shadow-[#ff3300]/20 hover:scale-110 transition-all active:scale-95 group"
              >
                 <Maximize2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
              </button>
@@ -331,7 +335,7 @@ export default function FitmentEngine({
                <button 
                 key={type}
                 onClick={() => setActiveProductType(type)}
-                className={`flex-1 py-5 text-[11px] font-black uppercase tracking-widest transition-all ${activeProductType === type ? 'text-[#ccff00] bg-[#ccff00]/5 border-b-2 border-[#ccff00]' : 'text-zinc-500 hover:text-zinc-300'}`}
+                className={`flex-1 py-5 text-[11px] font-black uppercase tracking-widest transition-all ${activeProductType === type ? 'text-[#ff3300] bg-[#ff3300]/5 border-b-2 border-[#ff3300]' : 'text-zinc-500 hover:text-zinc-300'}`}
                >
                   {type} System
                </button>
@@ -343,7 +347,7 @@ export default function FitmentEngine({
                 <section className="space-y-4">
                   <div className="flex items-center justify-between">
                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center space-x-2">
-                        <span className="w-1.5 h-1.5 bg-[#ccff00] rounded-full animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 bg-[#ff3300] rounded-full animate-pulse"></span>
                         <span>Vehicle Selection</span>
                      </h3>
                   </div>
@@ -353,7 +357,7 @@ export default function FitmentEngine({
                         key={v.id}
                         onClick={() => setSelectedVehicle(v)}
                         className={`aspect-[16/10] rounded-2xl border-2 overflow-hidden transition-all relative group flex items-center justify-center p-3 ${
-                          selectedVehicle.id === v.id ? "border-[#ccff00] bg-zinc-900 shadow-xl shadow-[#ccff00]/10" : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
+                          selectedVehicle.id === v.id ? "border-[#ff3300] bg-zinc-900 shadow-xl shadow-[#ff3300]/10" : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
                         }`}
                        >
                          <img src={v.image} className="w-full h-full object-contain filter contrast-[1.05]" alt={v.model} />
@@ -370,19 +374,19 @@ export default function FitmentEngine({
                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center space-x-2">
-                        <span className="w-1.5 h-1.5 bg-[#ccff00] rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-[#ff3300] rounded-full"></span>
                         <span>Catalog Search</span>
                      </h3>
                   </div>
 
                   <div className="relative group">
-                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-[#ccff00] transition-colors" />
+                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600 group-focus-within:text-[#ff3300] transition-colors" />
                      <input 
                        type="text" 
                        placeholder={`Search ${activeProductType}s...`}
                        value={searchQuery}
                        onChange={(e) => setSearchQuery(e.target.value)}
-                       className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-white placeholder:text-zinc-700 outline-none focus:border-[#ccff00]/50 transition-all"
+                       className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-xs font-bold text-white placeholder:text-zinc-700 outline-none focus:border-[#ff3300]/50 transition-all"
                      />
                      {searchQuery && (
                        <button 
@@ -402,7 +406,7 @@ export default function FitmentEngine({
                           key={brand}
                           onClick={() => setActiveBrand(activeBrand === brand ? null : brand)}
                           className={`px-4 py-2 rounded-xl border text-[10px] font-black uppercase transition-all flex-shrink-0 ${
-                            activeBrand === brand ? "bg-[#ccff00] border-[#ccff00] text-black" : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-white"
+                            activeBrand === brand ? "bg-[#ff3300] border-[#ff3300] text-black" : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-white"
                           }`}
                         >
                           {brand}
@@ -418,7 +422,7 @@ export default function FitmentEngine({
                       onClick={() => activeProductType === 'wheel' ? setSelectedWheel(p) : activeProductType === 'tire' ? setSelectedTire(p) : null}
                       role="button"
                       className={`group relative rounded-[2rem] border-2 overflow-hidden transition-all flex flex-col bg-zinc-950 cursor-pointer outline-none ${
-                        (activeProductType === 'wheel' ? selectedWheel.id === p.id : selectedTire.id === p.id) ? "border-[#ccff00] shadow-[0_0_40px_rgba(204,255,0,0.15)]" : "border-zinc-800/80 hover:border-zinc-700"
+                        (activeProductType === 'wheel' ? selectedWheel.id === p.id : selectedTire.id === p.id) ? "border-[#ff3300] shadow-[0_0_40px_rgba(255,51,0,0.15)]" : "border-zinc-800/80 hover:border-zinc-700"
                       }`}
                     >
                        <div className="aspect-square relative overflow-hidden bg-black flex items-center justify-center p-6">
@@ -430,23 +434,51 @@ export default function FitmentEngine({
                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.6)_100%)]" />
                        </div>
                        <div className="p-5 text-left relative">
-                          <button 
-                            className="absolute top-4 right-4 p-1.5 bg-zinc-900/80 rounded-lg hover:bg-[#ccff00] hover:text-black transition-all group/bell"
-                            title="Subscribe to Price Drop"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              alert("เราจะส่งอีเมลแจ้งเตือนให้ทันทีที่ราคาลดลงครับพี่!");
-                            }}
-                          >
-                             <Bell className="w-3 h-3" />
-                          </button>
-                          <span className="text-[8px] font-black uppercase text-[#ccff00] block tracking-widest mb-1">{p.brand}</span>
-                          <h4 className="text-[11px] font-black uppercase text-white truncate leading-tight mb-4">
+                          <div className="absolute top-4 right-4 flex flex-col gap-2">
+                            <button 
+                              className={`p-1.5 rounded-lg transition-all ${wishlist?.some(item => item.id === p.id) ? 'bg-[#ff3300] text-black' : 'bg-zinc-900/80 hover:bg-[#ff3300] hover:text-black text-zinc-400'}`}
+                              title="Toggle Wishlist"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleWishlist?.(p);
+                              }}
+                            >
+                               <Heart className={`w-3 h-3 ${wishlist?.some(item => item.id === p.id) ? 'fill-current' : ''}`} />
+                            </button>
+                            <button 
+                              className="p-1.5 bg-zinc-900/80 text-zinc-400 rounded-lg hover:bg-zinc-800 transition-all"
+                              title="Subscribe to Price Drop"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                alert("เราจะส่งอีเมลแจ้งเตือนให้ทันทีที่ราคาลดลงครับพี่!");
+                              }}
+                            >
+                               <Bell className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <span className="text-[8px] font-black uppercase text-[#ff3300] block tracking-widest mb-1">{p.brand}</span>
+                          <h4 className="text-[11px] font-black uppercase text-white leading-tight mb-1 pr-6">
                             {p.name}
                           </h4>
+                          <div className="flex items-center gap-1 mb-4 text-zinc-500">
+                             <Star className="w-3 h-3 text-[#ff3300] fill-[#ff3300]" />
+                             <span className="text-[9px] font-bold font-mono">{p.rating || "4.8"}</span>
+                             <span className="text-[9px]">({p.reviewCount || Math.floor(Math.random() * 50 + 10)} reviews)</span>
+                          </div>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setViewProduct(p);
+                            }}
+                            className="w-full py-1.5 mb-4 text-[9px] uppercase font-bold text-zinc-400 border border-zinc-800 rounded-lg hover:border-[#ff3300] hover:text-white transition-colors"
+                          >
+                            View Details & Reviews
+                          </button>
+
                           <div className="flex items-center justify-between">
                              <span className="text-sm font-black text-white italic tracking-tighter">{p.price.toLocaleString()} ฿</span>
-                             <div className="h-6 w-6 bg-zinc-900 rounded-lg flex items-center justify-center group-hover:bg-[#ccff00] transition-colors">
+                             <div className="h-6 w-6 bg-zinc-900 rounded-lg flex items-center justify-center group-hover:bg-[#ff3300] transition-colors">
                                 <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-black transition-colors" />
                              </div>
                           </div>
@@ -463,7 +495,7 @@ export default function FitmentEngine({
                 <div className="flex flex-col">
                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Grand Total</span>
                    <div className="flex items-baseline space-x-1">
-                      <span className="text-3xl font-black italic tracking-tighter text-[#ccff00]">
+                      <span className="text-3xl font-black italic tracking-tighter text-[#ff3300]">
                         {activeProductType === 'bundle' ? finalPayAmount.toLocaleString() : (selectedWheel.price + selectedTire.price).toLocaleString()}
                       </span>
                       <span className="text-sm font-bold text-zinc-500 uppercase">฿</span>
@@ -472,14 +504,14 @@ export default function FitmentEngine({
                  <div className="flex gap-4 items-center">
                     <button 
                       onClick={() => alert("Build configuration saved to your local registry!")}
-                      className="h-16 px-6 bg-zinc-900 border border-zinc-800 text-white rounded-2xl flex items-center justify-center hover:border-[#ccff00] transition-all group"
+                      className="h-16 px-6 bg-zinc-900 border border-zinc-800 text-white rounded-2xl flex items-center justify-center hover:border-[#ff3300] transition-all group"
                     >
                       <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
                     </button>
                     
                     <button 
                       onClick={() => activeProductType === 'bundle' ? onAddBundleToCart?.(selectedWheel, selectedTire, quantity, finalDiscount) : onAddToCart?.(selectedWheel)}
-                      className="flex-1 h-16 bg-[#ccff00] hover:bg-lime-400 text-black rounded-2xl flex items-center justify-center space-x-3 transition-all transform active:scale-95 shadow-2xl shadow-[#ccff00]/20"
+                      className="flex-1 h-16 bg-[#ff3300] hover:bg-[#ff4500] text-black rounded-2xl flex items-center justify-center space-x-3 transition-all transform active:scale-95 shadow-2xl shadow-[#ff3300]/20"
                     >
                        <span className="text-xs font-black uppercase tracking-[0.2em]">Add to Quote</span>
                        <ArrowRight className="w-5 h-5" />
@@ -490,13 +522,75 @@ export default function FitmentEngine({
         </aside>
       </main>
 
+      {/* Product Detail Modal */}
+      {viewProduct && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-[#0a0a0a]/90 backdrop-blur-md">
+          <div className="relative w-full max-w-4xl max-h-full overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-6 md:p-8 custom-scrollbar shadow-2xl">
+            <button
+              onClick={() => setViewProduct(null)}
+              className="absolute top-4 right-4 p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors z-10"
+            >
+              ✕
+            </button>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 flex items-center justify-center p-8 relative">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,51,0,0.05),transparent_60%)]" />
+                <img src={viewProduct.image} alt={viewProduct.name} className="w-full h-auto object-contain max-h-[300px] z-10 drop-shadow-2xl" />
+              </div>
+              <div className="flex flex-col justify-center space-y-4">
+                <div>
+                  <span className="text-[10px] font-black uppercase text-[#ff3300] tracking-widest">{viewProduct.brand}</span>
+                  <h2 className="text-2xl font-black uppercase text-white tracking-tight">{viewProduct.name}</h2>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xl font-black text-[#ff3300] italic">{viewProduct.price.toLocaleString()} ฿</span>
+                  {viewProduct.stock < 5 ? (
+                    <span className="text-[9px] font-bold text-rose-400 uppercase border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 rounded">Low Stock: {viewProduct.stock} left</span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-emerald-400 uppercase border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 rounded">In Stock: {viewProduct.stock}</span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-400 leading-relaxed font-mono">{viewProduct.description || 'High-performance automotive component designed for extreme stress conditions.'}</p>
+                
+                {/* Specs */}
+                <div className="grid grid-cols-2 gap-2 mt-4 text-[10px] font-mono">
+                  {viewProduct.size && <div className="bg-zinc-900 p-2 rounded text-zinc-300">Size: <span className="text-white font-bold">{viewProduct.size}"</span></div>}
+                  {viewProduct.width && <div className="bg-zinc-900 p-2 rounded text-zinc-300">Width: <span className="text-white font-bold">{viewProduct.width}J</span></div>}
+                  {viewProduct.offset !== undefined && <div className="bg-zinc-900 p-2 rounded text-zinc-300">Offset: <span className="text-white font-bold">+{viewProduct.offset}</span></div>}
+                  {viewProduct.pcdCompat && <div className="bg-zinc-900 p-2 rounded text-zinc-300">PCD: <span className="text-white font-bold">{viewProduct.pcdCompat.join(', ')}</span></div>}
+                  {viewProduct.color && <div className="bg-zinc-900 p-2 rounded text-zinc-300">Color: <span className="text-white font-bold">{viewProduct.color}</span></div>}
+                  {viewProduct.weight && <div className="bg-zinc-900 p-2 rounded text-zinc-300">Weight: <span className="text-white font-bold">{viewProduct.weight} kg</span></div>}
+                </div>
+              </div>
+            </div>
+
+            <ReviewSection 
+              productId={viewProduct.id} 
+              reviews={viewProduct.reviews || []}
+              onAddReview={(pid, review) => {
+                const newReview = { ...review, id: `r_${Date.now()}`, date: new Date().toLocaleDateString('en-US'), status: 'pending' as const };
+                const updatedProduct = {
+                  ...viewProduct,
+                  reviews: [...(viewProduct.reviews || []), newReview]
+                };
+                setViewProduct(updatedProduct);
+                if (onUpdateProduct) {
+                  onUpdateProduct(updatedProduct);
+                }
+              }} 
+            />
+          </div>
+        </div>
+      )}
+
       <style dangerouslySetInnerHTML={{ __html: `
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ccff00; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #ff3300; }
       `}} />
     </div>
   );

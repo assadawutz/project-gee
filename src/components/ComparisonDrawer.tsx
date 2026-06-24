@@ -29,7 +29,7 @@ export default function ComparisonDrawer({
         <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
           
           <div className="flex items-center space-x-2.5">
-            <Scale className="w-5 h-5 text-[#ccff00]" />
+            <Scale className="w-5 h-5 text-[#ff3300]" />
             <h3 className="font-sans font-black text-sm uppercase text-white tracking-wider">
               แผงเปรียบเทียบสเปกออฟเซ็ต ({comparisonList.length}/4)
             </h3>
@@ -81,7 +81,7 @@ export default function ComparisonDrawer({
                   </div>
                   <div>
                     <h4 className="font-bold text-xs truncate text-center text-white">{p.name}</h4>
-                    <span className="block text-[9px] text-[#ccff00] uppercase font-bold text-center font-mono tracking-widest">{p.brand}</span>
+                    <span className="block text-[9px] text-[#ff3300] uppercase font-bold text-center font-mono tracking-widest">{p.brand}</span>
                   </div>
                 </div>
 
@@ -102,7 +102,7 @@ export default function ComparisonDrawer({
                     <>
                       <div className="flex justify-between">
                         <span>ขอบวงล้อ (Size):</span>
-                        <strong className="text-[#ccff00]">{p.size}″ J</strong>
+                        <strong className="text-[#ff3300]">{p.size}″ J</strong>
                       </div>
                       <div className="flex justify-between">
                         <span>กว้าง (Width):</span>
@@ -129,7 +129,7 @@ export default function ComparisonDrawer({
                     <>
                       <div className="flex justify-between">
                         <span>ขนาดยืนยาง (Width):</span>
-                        <strong className="text-[#ccff00]">{p.tireWidth} mm</strong>
+                        <strong className="text-[#ff3300]">{p.tireWidth} mm</strong>
                       </div>
                       <div className="flex justify-between">
                         <span>สเปกแก้ม (Aspect):</span>
@@ -157,7 +157,7 @@ export default function ComparisonDrawer({
                 <button
                   onClick={() => onAddToCart(p)}
                   disabled={p.stock === 0}
-                  className="w-full py-1.5 bg-[#ccff00] text-[#0a0a0a] rounded-lg text-[10px] font-black uppercase text-center flex items-center justify-center space-x-1 cursor-pointer hover:bg-lime-400 font-sans disabled:opacity-40"
+                  className="w-full py-1.5 bg-[#ff3300] text-[#0a0a0a] rounded-lg text-[10px] font-black uppercase text-center flex items-center justify-center space-x-1 cursor-pointer hover:bg-[#ff4500] font-sans disabled:opacity-40"
                 >
                   <ShoppingCart className="w-3 h-3" />
                   <span>สั่งซื้อขอบล้อนี้</span>

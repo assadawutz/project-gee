@@ -67,7 +67,7 @@
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ccff00;
+  background: #ff3300;
 }
 
 /* LIGHT MODE ENHANCED POLISHED OVERRIDES */
@@ -137,33 +137,33 @@
 }
 
 /* Primary Brand Color Overrides */
-.light .text-\[\#ccff00\],
+.light .text-\[\#ff3300\],
 .light .text-lime-400 {
   color: var(--brand-color) !important;
 }
 
-.light .bg-\[\#ccff00\],
+.light .bg-\[\#ff3300\],
 .light .bg-lime-400 {
   background-color: #65a30d !important; /* Grounded green */
   color: #ffffff !important;
 }
 
-.light .border-\[\#ccff00\],
+.light .border-\[\#ff3300\],
 .light .border-lime-400 {
   border-color: #65a30d !important;
 }
 
 /* Tinted brand elements */
-.light .bg-\[\#ccff00\]\/5,
-.light .bg-\[\#ccff00\]\/10,
-.light .bg-\[\#ccff00\]\/20,
-.light .bg-\[\#ccff00\]\/25 {
+.light .bg-\[\#ff3300\]\/5,
+.light .bg-\[\#ff3300\]\/10,
+.light .bg-\[\#ff3300\]\/20,
+.light .bg-\[\#ff3300\]\/25 {
   background-color: rgba(101, 163, 13, 0.08) !important;
 }
 
-.light .border-\[\#ccff00\]\/30,
-.light .border-\[\#ccff00\]\/20,
-.light .border-\[\#ccff00\]\/40 {
+.light .border-\[\#ff3300\]\/30,
+.light .border-\[\#ff3300\]\/20,
+.light .border-\[\#ff3300\]\/40 {
   border-color: rgba(101, 163, 13, 0.2) !important;
 }
 

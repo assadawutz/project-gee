@@ -55,6 +55,7 @@ export default function App() {
       geeCoins: 4500,
       totalSpend: 155000,
       membershipTier: "Gold",
+      wishlist: [],
       savedVehicles: [
         {
           id: "v_civic_fl5",
@@ -502,7 +503,13 @@ export default function App() {
           <div className="container mx-auto px-4 max-w-7xl">
             {/* Dynamic Navigation Panels */}
             {activeTab === "profile" && user && (
-              <UserDashboard user={user} onLogout={handleLogout} />
+              <UserDashboard 
+                user={user} 
+                onLogout={handleLogout} 
+                wishlist={wishlist}
+                onRemoveFromWishlist={handleToggleWishlist}
+                onMoveToCart={handleAddToCart}
+              />
             )}
 
             {activeTab === "landing" && (
@@ -516,13 +523,13 @@ export default function App() {
               <>
                 {/* Wizard Navigation */}
                 <div className="flex space-x-2 mb-8 justify-center">
-                  {(["fitment", "virtual", "bundle"] as const).map(step => (
+                  {(["fitment", "virtual"] as const).map(step => (
                      <button 
                        key={step} 
                        onClick={() => setWizardStep(step)} 
-                       className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${wizardStep === step ? 'bg-[#ccff00] text-black shadow-[0_0_20px_rgba(204,255,0,0.3)]' : 'bg-zinc-900 text-zinc-500 hover:text-white'}`}
+                       className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${wizardStep === step ? 'bg-[#ff3300] text-black shadow-[0_0_20px_rgba(255,51,0,0.3)]' : 'bg-zinc-900 text-zinc-500 hover:text-white'}`}
                      >
-                       {step}
+                       {step === "fitment" ? "1. Fitment Logic" : "2. Virtual Preview"}
                      </button>
                   ))}
                 </div>
@@ -541,6 +548,9 @@ export default function App() {
                     onTrackAction={handleTrackAction}
                     wishlist={wishlist}
                     onToggleWishlist={handleToggleWishlist}
+                    onUpdateProduct={(updatedProduct) => {
+                      handleUpdateProduct(updatedProduct.id, { reviews: updatedProduct.reviews });
+                    }}
                   />
                 )}
 
@@ -596,7 +606,7 @@ export default function App() {
       {/* STRIPE PAYMENT GATEWAY SIMULATED CHECKOUT MODAL */}
       {checkoutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md select-none">
-          <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-6 shadow-2xl ring-1 ring-[#ccff00]/10 text-white animate-fade-in space-y-6">
+          <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-6 shadow-2xl ring-1 ring-[#ff3300]/10 text-white animate-fade-in space-y-6">
             {/* Close Button top corner */}
             <button
               onClick={() => setCheckoutOpen(false)}
@@ -609,7 +619,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-sans font-black text-xl uppercase italic text-white leading-none">
-                  Secure <span className="text-[#ccff00]">Checkout</span>
+                  Secure <span className="text-[#ff3300]">Checkout</span>
                 </h2>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
                   Powered by Stripe Gateway // GEE CO.
@@ -625,14 +635,14 @@ export default function App() {
                   { step: 2, label: "Payment", icon: CreditCard },
                 ].map((s) => (
                   <div key={s.step} className="flex flex-col items-center flex-1 relative">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-500 border-2 ${checkoutStep >= s.step ? 'bg-[#ccff00] border-[#ccff00] text-black shadow-[0_0_15px_rgba(204,255,0,0.4)]' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-500 border-2 ${checkoutStep >= s.step ? 'bg-[#ff3300] border-[#ff3300] text-black shadow-[0_0_15px_rgba(255,51,0,0.4)]' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>
                       <s.icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-[8px] font-black uppercase mt-2 tracking-widest ${checkoutStep >= s.step ? 'text-[#ccff00]' : 'text-zinc-600'}`}>
+                    <span className={`text-[8px] font-black uppercase mt-2 tracking-widest ${checkoutStep >= s.step ? 'text-[#ff3300]' : 'text-zinc-600'}`}>
                       {s.label}
                     </span>
                     {s.step === 1 && (
-                      <div className={`absolute top-4 left-[60%] w-[80%] h-0.5 z-0 ${checkoutStep > 1 ? 'bg-[#ccff00]' : 'bg-zinc-900'}`} />
+                      <div className={`absolute top-4 left-[60%] w-[80%] h-0.5 z-0 ${checkoutStep > 1 ? 'bg-[#ff3300]' : 'bg-zinc-900'}`} />
                     )}
                   </div>
                 ))}
@@ -647,7 +657,7 @@ export default function App() {
                       <label className="text-[10px] font-bold text-zinc-500 uppercase">Full Name</label>
                       <input 
                         type="text" value={shippingInfo.name} onChange={(e) => setShippingInfo({...shippingInfo, name: e.target.value})}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ff3300]/50"
                         placeholder="John Doe"
                       />
                     </div>
@@ -655,7 +665,7 @@ export default function App() {
                       <label className="text-[10px] font-bold text-zinc-500 uppercase">Phone</label>
                       <input 
                         type="text" value={shippingInfo.phone} onChange={(e) => setShippingInfo({...shippingInfo, phone: e.target.value})}
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ff3300]/50"
                         placeholder="081-XXX-XXXX"
                       />
                     </div>
@@ -664,7 +674,7 @@ export default function App() {
                     <label className="text-[10px] font-bold text-zinc-500 uppercase">Email Address</label>
                     <input 
                       type="email" value={shippingInfo.email} onChange={(e) => setShippingInfo({...shippingInfo, email: e.target.value})}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ff3300]/50"
                       placeholder="john@example.com"
                     />
                   </div>
@@ -672,7 +682,7 @@ export default function App() {
                     <label className="text-[10px] font-bold text-zinc-500 uppercase">Shipping Address</label>
                     <textarea 
                       value={shippingInfo.address} onChange={(e) => setShippingInfo({...shippingInfo, address: e.target.value})}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ccff00]/50 min-h-[80px]"
+                      className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs font-bold text-white outline-none focus:border-[#ff3300]/50 min-h-[80px]"
                       placeholder="123 Moo 4, Bangkok, Thailand..."
                     />
                   </div>
@@ -688,15 +698,15 @@ export default function App() {
                       </div>
                     ))}
                     <div className="pt-2 border-t border-zinc-800 flex justify-between items-center text-sm">
-                      <span className="text-[#ccff00] font-black uppercase italic">Total</span>
-                      <span className="text-[#ccff00] font-black italic">{netCheckoutAmount.toLocaleString()} ฿</span>
+                      <span className="text-[#ff3300] font-black uppercase italic">Total</span>
+                      <span className="text-[#ff3300] font-black italic">{netCheckoutAmount.toLocaleString()} ฿</span>
                     </div>
                   </div>
                 </div>
 
                 <button 
                   onClick={() => setCheckoutStep(2)}
-                  className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-[0.2em] hover:bg-lime-400 transition-all shadow-xl shadow-[#ccff00]/10"
+                  className="w-full py-4 bg-[#ff3300] text-black rounded-xl font-black uppercase text-xs tracking-[0.2em] hover:bg-[#ff4500] transition-all shadow-xl shadow-[#ff3300]/10"
                 >
                   Continue to Payment
                 </button>
@@ -707,14 +717,14 @@ export default function App() {
                 <div className="flex space-x-2">
                    <button 
                     onClick={() => setPaymentMethod("card")}
-                    className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "card" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
+                    className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "card" ? "bg-[#ff3300]/10 border-[#ff3300] text-[#ff3300]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
                    >
                       <CreditCard className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Card</span>
                    </button>
                    <button 
                     onClick={() => setPaymentMethod("qr")}
-                    className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "qr" ? "bg-[#ccff00]/10 border-[#ccff00] text-[#ccff00]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
+                    className={`flex-1 py-3 rounded-xl border flex items-center justify-center space-x-2 transition-all ${paymentMethod === "qr" ? "bg-[#ff3300]/10 border-[#ff3300] text-[#ff3300]" : "bg-zinc-950 border-zinc-900 text-zinc-500"}`}
                    >
                       <QrCode className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">PromptPay</span>
@@ -730,7 +740,7 @@ export default function App() {
                         <div className={`absolute inset-0 p-5 flex flex-col justify-between backface-invisible ${isCvvFocused ? "hidden" : "block"}`}>
                           <div className="flex justify-between items-start">
                             <span className="font-mono text-zinc-600 text-xs tracking-widest">GEE RACER CREDIT</span>
-                            <CreditCard className="w-8 h-8 text-[#ccff00]" />
+                            <CreditCard className="w-8 h-8 text-[#ff3300]" />
                           </div>
                           <p className="font-mono text-base tracking-widest text-zinc-200">{checkoutPayload.cardNumber}</p>
                           <div className="flex justify-between items-end font-mono text-[10px] text-zinc-500">
@@ -762,7 +772,7 @@ export default function App() {
                         <input
                           type="text" required placeholder="WITTAYA CHAROEMPAN" value={checkoutPayload.cardName}
                           onChange={(e) => setCheckoutPayload({...checkoutPayload, cardName: e.target.value.toUpperCase()})}
-                          className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-bold text-white uppercase focus:border-[#ccff00] outline-none"
+                          className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-bold text-white uppercase focus:border-[#ff3300] outline-none"
                         />
                       </div>
                       <div className="grid grid-cols-3 gap-2">
@@ -771,7 +781,7 @@ export default function App() {
                           <input
                             type="text" required value={checkoutPayload.cardNumber}
                             onChange={(e) => setCheckoutPayload({...checkoutPayload, cardNumber: e.target.value})}
-                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ccff00] outline-none"
+                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ff3300] outline-none"
                           />
                         </div>
                         <div className="flex flex-col space-y-1">
@@ -780,19 +790,19 @@ export default function App() {
                             type="text" required maxLength={3} value={checkoutPayload.cardCvv}
                             onChange={(e) => setCheckoutPayload({...checkoutPayload, cardCvv: e.target.value})}
                             onFocus={() => setIsCvvFocused(true)} onBlur={() => setIsCvvFocused(false)}
-                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ccff00] outline-none"
+                            className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-mono font-bold text-white focus:border-[#ff3300] outline-none"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <button type="submit" className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-lime-400 transition-all">
+                    <button type="submit" className="w-full py-4 bg-[#ff3300] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-[#ff4500] transition-all">
                       Confirm Payment
                     </button>
                   </form>
                 ) : (
                   <div className="space-y-6 py-4 flex flex-col items-center">
-                     <div className="p-6 bg-white rounded-2xl shadow-xl shadow-[#ccff00]/10 border-4 border-zinc-900">
+                     <div className="p-6 bg-white rounded-2xl shadow-xl shadow-[#ff3300]/10 border-4 border-zinc-900">
                         <QrCode className="w-48 h-48 text-black" />
                         <div className="mt-4 flex items-center justify-center space-x-2 text-black">
                            <Smartphone className="w-4 h-4" />
@@ -800,7 +810,7 @@ export default function App() {
                         </div>
                      </div>
                      <button onClick={() => { showToast("Payment Successful!", "success"); setCheckoutStep(3); }}
-                        className="w-full py-4 bg-[#ccff00] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-lime-400 transition-all"
+                        className="w-full py-4 bg-[#ff3300] text-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-[#ff4500] transition-all"
                       >
                         I HAVE PAID
                       </button>
@@ -810,7 +820,7 @@ export default function App() {
               </div>
             ) : (
               <div className="text-center py-10 space-y-6 animate-fade-in">
-                <div className="w-20 h-20 bg-[#ccff00] rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-[#ccff00]/20 rotate-12">
+                <div className="w-20 h-20 bg-[#ff3300] rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-[#ff3300]/20 rotate-12">
                   <CheckCircle2 className="w-10 h-10 text-black" />
                 </div>
                 <div>
@@ -821,7 +831,7 @@ export default function App() {
                 </div>
                 <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 inline-block">
                   <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Order ID:</span>
-                  <span className="text-[#ccff00] font-black ml-2 font-mono">#GEE-{Math.floor(100000 + Math.random() * 900000)}</span>
+                  <span className="text-[#ff3300] font-black ml-2 font-mono">#GEE-{Math.floor(100000 + Math.random() * 900000)}</span>
                 </div>
                 <button onClick={() => setCheckoutOpen(false)} className="w-full py-4 bg-white text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-all">
                   Return to Workspace
@@ -844,20 +854,19 @@ export default function App() {
             </button>
             <div className="text-center font-sans">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-500/10 mb-3 border border-amber-500/30">
-                <Bell className="w-6 h-6 text-[#ccff00]" />
+                <Bell className="w-6 h-6 text-[#ff3300]" />
               </div>
-              <span className="text-[10px] uppercase font-black text-[#ccff00] tracking-widest">
+              <span className="text-[10px] uppercase font-black text-[#ff3300] tracking-widest">
                 OUT OF STOCK TRACKER
               </span>
               <h3 className="font-sans font-black text-lg">
-                แจ้งเตือนสินค้าพร้อมขาย
+                INVENTORY ALERT REGISTRATION
               </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                ลงชื่อเมลของพี่ด้านล่างเพื่อรับเมลแจ้งเตือนทันทีที่{" "}
+              <p className="text-xs text-zinc-400 mt-1 uppercase font-mono leading-relaxed">
+                REGISTER TO RECEIVE NOTIFICATIONS WHEN PROCUREMENT STOCK REPLENISHES FOR:{" "}
                 <strong>
                   {backInStockProduct.brand} {backInStockProduct.name}
-                </strong>{" "}
-                กลับมามีในสต็อกหลังร้านครับ!
+                </strong>
               </p>
             </div>
 
@@ -871,7 +880,7 @@ export default function App() {
                 <p className="font-bold text-white leading-snug">
                   {backInStockProduct.name}
                 </p>
-                <p className="text-[#ccff00] font-mono mt-0.5">
+                <p className="text-[#ff3300] font-mono mt-0.5">
                   {backInStockProduct.price.toLocaleString()} ฿
                 </p>
               </div>
@@ -880,7 +889,7 @@ export default function App() {
             <form onSubmit={handleSubscribeBackInStock} className="space-y-3">
               <div className="flex flex-col space-y-1">
                 <label className="text-[9px] font-black uppercase text-zinc-500">
-                  อีเมลการแจ้งเตือน (Notification Email):
+                  NOTIFICATION EMAIL:
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-550">
@@ -889,19 +898,19 @@ export default function App() {
                   <input
                     type="email"
                     required
-                    placeholder="เช่น you@example.com"
+                    placeholder="e.g. comms@domain.com"
                     value={subscriptionEmail}
                     onChange={(e) => setSubscriptionEmail(e.target.value)}
-                    className="w-full pl-9 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ccff00] outline-none placeholder:text-zinc-600"
+                    className="w-full pl-9 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ff3300] outline-none placeholder:text-zinc-600"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 bg-[#ccff00] text-[#0a0a0a] rounded-lg text-xs font-black uppercase tracking-wider hover:opacity-95 transition-opacity"
+                className="w-full py-2.5 bg-[#ff3300] text-[#0a0a0a] rounded-lg text-xs font-black uppercase tracking-wider hover:opacity-95 transition-opacity"
               >
-                แจ้งเตือนฉันเมื่อของเข้าคลัง (Alert Me)
+                ENABLE STOCK ALERT
               </button>
             </form>
           </div>
@@ -919,15 +928,14 @@ export default function App() {
               ✕
             </button>
             <div className="text-center font-sans mb-4">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#ccff00]/10 mb-3 border border-[#ccff00]/30">
-                <User className="w-6 h-6 text-[#ccff00]" />
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#ff3300]/10 mb-3 border border-[#ff3300]/30">
+                <User className="w-6 h-6 text-[#ff3300]" />
               </div>
               <h3 className="font-sans font-black text-xl uppercase italic">
-                Gee <span className="text-[#ccff00]">Account</span>
+                Gee <span className="text-[#ff3300]">Account</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-1">
-                เข้าสู่ระบบเพื่อสะสมแต้ม ดูประวัติการสั่งซื้อ
-                และจองคิวเข้ารับบริการ
+              <p className="text-[10px] uppercase font-mono tracking-widest text-zinc-400 mt-2 leading-relaxed">
+                AUTHENTICATE TO ACCESS TELEMETRY, LOGISTICS TRACKING, AND SECURE BAY RESERVATIONS
               </p>
             </div>
 
@@ -945,7 +953,7 @@ export default function App() {
                 <input
                   type="email"
                   defaultValue="assadawut.sarakul@gmail.com"
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ccff00] outline-none"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ff3300] outline-none"
                 />
               </div>
               <div className="flex flex-col space-y-1">
@@ -955,14 +963,14 @@ export default function App() {
                 <input
                   type="password"
                   defaultValue="password"
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ccff00] outline-none"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-white focus:border-[#ff3300] outline-none"
                 />
               </div>
 
               <div className="flex space-x-2">
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-[#ccff00] text-[#0a0a0a] rounded-lg text-xs font-black uppercase tracking-wider hover:opacity-95 transition-opacity"
+                  className="w-full py-2.5 bg-[#ff3300] text-[#0a0a0a] rounded-lg text-xs font-black uppercase tracking-wider hover:opacity-95 transition-opacity"
                 >
                   เข้าสู่ระบบ
                 </button>
@@ -992,7 +1000,7 @@ export default function App() {
           ที่อยู่: 557 หมู่ 5 ถ.บางแวก แขวงบางไผ่ เขตบางแค กรุงเทพมหานคร 10160
         </p>
         <p>เบอร์โทรศัพท์: 087-664-7617, 095-437-3871</p>
-        <p className="text-[#ccff00]">
+        <p className="text-[#ff3300]">
           นโยบายการจัดส่ง: มีบริการจัดส่งด่วนทั่วไทยสำหรับลูกค้าต่างจังหวัด
         </p>
         <p>
@@ -1007,10 +1015,10 @@ export default function App() {
 
       {/* Premium Floating Custom Toast Banner avoiding unhandled iframe alerts */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-pulse max-w-sm w-full bg-zinc-950/95 border border-[#ccff00]/30 rounded-xl p-4 shadow-2xl flex items-center space-x-3.5 ring-1 ring-[#ccff00]/20">
+        <div className="fixed bottom-6 right-6 z-50 animate-pulse max-w-sm w-full bg-zinc-950/95 border border-[#ff3300]/30 rounded-xl p-4 shadow-2xl flex items-center space-x-3.5 ring-1 ring-[#ff3300]/20">
           <div className="flex-shrink-0">
             {toast.type === "success" && (
-              <CheckCircle2 className="w-5 h-5 text-[#ccff00]" />
+              <CheckCircle2 className="w-5 h-5 text-[#ff3300]" />
             )}
             {toast.type === "warn" && (
               <AlertTriangle className="w-5 h-5 text-amber-500" />

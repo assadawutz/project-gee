@@ -23,6 +23,7 @@ export interface ProductReview {
   rating: number; // 1-5
   comment: string;
   date: string;
+  status?: 'pending' | 'approved' | 'rejected';
 }
 
 export interface PricePoint {
@@ -41,7 +42,7 @@ export interface Product {
   description: string;
 
   // Rating and Reviews
-  rating?: number;
+  averageRating?: number;
   reviewCount?: number;
   reviews?: ProductReview[];
 
@@ -115,6 +116,7 @@ export interface UserProfile {
   savedVehicles: Vehicle[];
   orders: Order[];
   bookings: Booking[];
+  wishlist: Product[];
 }
 
 export interface ChatMessage {

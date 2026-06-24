@@ -24,8 +24,29 @@ export default function AdminDashboard({
   
   // Dashboard states
   const [analyticsData, setAnalyticsData] = useState<any>(null);
-  const [activeSegment, setActiveSegment] = useState<'overview' | 'inventory' | 'bookings' | 'orders'>('overview');
+  const [activeSegment, setActiveSegment] = useState<'overview' | 'inventory' | 'bookings' | 'orders' | 'reviews'>('overview');
   const [loading, setLoading] = useState(false);
+
+  // Compute pending reviews from products
+  const pendingReviews = products
+    .flatMap(p => (p.reviews || []).map(r => ({ ...r, productId: p.id, productName: p.name })))
+    .filter(r => r.status === 'pending');
+
+  const handleApproveReview = async (productId: string, reviewId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    const updatedReviews = (product.reviews || []).map(r => r.id === reviewId ? { ...r, status: 'approved' as const } : r);
+    const success = await onUpdateProduct(productId, { reviews: updatedReviews });
+    if (success && onShowToast) onShowToast("Review approved and published successfully.", "success");
+  };
+
+  const handleDeleteReview = async (productId: string, reviewId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    const updatedReviews = (product.reviews || []).filter(r => r.id !== reviewId);
+    const success = await onUpdateProduct(productId, { reviews: updatedReviews });
+    if (success && onShowToast) onShowToast("Review deleted.", "info");
+  };
 
   // Edit stock states
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -84,7 +105,7 @@ export default function AdminDashboard({
       <div className="rounded-2xl border border-zinc-800 bg-[#0a0a0a]/50 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="font-sans font-black tracking-tight text-2xl md:text-3xl uppercase italic text-white flex items-center space-x-2.5">
-            <ShieldCheck className="w-8 h-8 text-[#ccff00]" />
+            <ShieldCheck className="w-8 h-8 text-[#ff3300]" />
             <span>Gee Live Management Portal</span>
           </h2>
           <p className="mt-1 text-sm text-zinc-400 font-medium">
@@ -94,7 +115,7 @@ export default function AdminDashboard({
 
         <button
           onClick={fetchAnalytics}
-          className="flex items-center space-x-1.5 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-bold text-zinc-300 hover:text-white hover:border-[#ccff00] cursor-pointer"
+          className="flex items-center space-x-1.5 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs font-bold text-zinc-300 hover:text-white hover:border-[#ff3300] cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>รีโหลดข้อมูลสด</span>
@@ -108,9 +129,9 @@ export default function AdminDashboard({
         <div className="rounded-xl border border-zinc-900 bg-gradient-to-tr from-zinc-950 to-[#0c0c0c] p-5 space-y-2">
           <div className="flex items-center justify-between text-zinc-500">
             <span className="text-[10px] uppercase font-black tracking-wider">มูลค่าคำสั่งซื้อรวม</span>
-            <DollarSign className="w-4 h-4 text-[#ccff00]" />
+            <DollarSign className="w-4 h-4 text-[#ff3300]" />
           </div>
-          <p className="text-2xl font-black italic tracking-tight text-[#ccff00]">{totalRevenue.toLocaleString()} ฿</p>
+          <p className="text-2xl font-black italic tracking-tight text-[#ff3300]">{totalRevenue.toLocaleString()} ฿</p>
           <p className="text-[10px] text-zinc-400 font-mono">จากระบบชำระเงินตัดสตรีท (Stripe Real)</p>
         </div>
 
@@ -151,7 +172,7 @@ export default function AdminDashboard({
         <button
           onClick={() => setActiveSegment('overview')}
           className={`px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-            activeSegment === 'overview' ? 'border-[#ccff00] text-[#ccff00]' : 'border-transparent text-zinc-400 hover:text-white'
+            activeSegment === 'overview' ? 'border-[#ff3300] text-[#ff3300]' : 'border-transparent text-zinc-400 hover:text-white'
           }`}
         >
           รายงานวิเคราะห์ขาย (Analytics Graph)
@@ -160,7 +181,7 @@ export default function AdminDashboard({
         <button
           onClick={() => setActiveSegment('inventory')}
           className={`px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-            activeSegment === 'inventory' ? 'border-[#ccff00] text-[#ccff00]' : 'border-transparent text-zinc-400 hover:text-white'
+            activeSegment === 'inventory' ? 'border-[#ff3300] text-[#ff3300]' : 'border-transparent text-zinc-400 hover:text-white'
           }`}
         >
           สต็อกและบอร์ดราคา (Inventory)
@@ -169,7 +190,7 @@ export default function AdminDashboard({
         <button
           onClick={() => setActiveSegment('bookings')}
           className={`px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-            activeSegment === 'bookings' ? 'border-[#ccff00] text-[#ccff00]' : 'border-transparent text-zinc-400 hover:text-white'
+            activeSegment === 'bookings' ? 'border-[#ff3300] text-[#ff3300]' : 'border-transparent text-zinc-400 hover:text-white'
           }`}
         >
           คัดกรองคิวติดตั้ง ({bookings.length})
@@ -178,10 +199,19 @@ export default function AdminDashboard({
         <button
           onClick={() => setActiveSegment('orders')}
           className={`px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-            activeSegment === 'orders' ? 'border-[#ccff00] text-[#ccff00]' : 'border-transparent text-zinc-400 hover:text-white'
+            activeSegment === 'orders' ? 'border-[#ff3300] text-[#ff3300]' : 'border-transparent text-zinc-400 hover:text-white'
           }`}
         >
           ประวัติตัดบิล ({orders.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSegment('reviews')}
+          className={`px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
+            activeSegment === 'reviews' ? 'border-[#ff3300] text-[#ff3300]' : 'border-transparent text-zinc-400 hover:text-white'
+          }`}
+        >
+          Reviews Moderation ({pendingReviews.length})
         </button>
       </div>
 
@@ -195,7 +225,7 @@ export default function AdminDashboard({
               <h3 className="font-sans font-black text-white text-sm uppercase">รายงานเปรียบเทียบพฤติกรรมการคลิกคัดสรร</h3>
               <p className="text-[10px] text-zinc-500">กราฟิกสถิติมูลค่ายอดฟิตเมนต์และ AI Chat ของผู้ใช้บนแพลตฟอร์ม</p>
             </div>
-            <span className="rounded-md bg-[#ccff00]/10 text-[#ccff00] px-2 py-0.5 text-[9px] font-black uppercase border border-[#ccff00]/20 font-mono">LIVE FEED</span>
+            <span className="rounded-md bg-[#ff3300]/10 text-[#ff3300] px-2 py-0.5 text-[9px] font-black uppercase border border-[#ff3300]/20 font-mono">LIVE FEED</span>
           </div>
 
           {/* Polished custom SVG diagram chart */}
@@ -212,18 +242,18 @@ export default function AdminDashboard({
               <path 
                 d="M 20 120 L 100 60 L 180 85 L 260 135 L 340 70" 
                 fill="none" 
-                stroke="#ccff00" 
+                stroke="#ff3300" 
                 strokeWidth="2.5" 
                 strokeLinecap="round"
                 className="animate-pulse"
               />
 
               {/* Glowing circles overlay */}
-              <circle cx="20" cy="120" r="4" fill="#0d0d0d" stroke="#ccff00" strokeWidth="2" />
-              <circle cx="100" cy="60" r="4" fill="#0d0d0d" stroke="#ccff00" strokeWidth="2" />
-              <circle cx="180" cy="85" r="4" fill="#0d0d0d" stroke="#ccff00" strokeWidth="2" />
-              <circle cx="260" cy="135" r="4" fill="#0d0d0d" stroke="#ccff00" strokeWidth="2" />
-              <circle cx="340" cy="70" r="4" fill="#0d0d0d" stroke="#ccff00" strokeWidth="2" />
+              <circle cx="20" cy="120" r="4" fill="#0d0d0d" stroke="#ff3300" strokeWidth="2" />
+              <circle cx="100" cy="60" r="4" fill="#0d0d0d" stroke="#ff3300" strokeWidth="2" />
+              <circle cx="180" cy="85" r="4" fill="#0d0d0d" stroke="#ff3300" strokeWidth="2" />
+              <circle cx="260" cy="135" r="4" fill="#0d0d0d" stroke="#ff3300" strokeWidth="2" />
+              <circle cx="340" cy="70" r="4" fill="#0d0d0d" stroke="#ff3300" strokeWidth="2" />
 
               {/* Chart labels inline */}
               <text x="20" y="145" fill="#555" fontSize="7" fontStyle="bold" textAnchor="middle">FITMENT</text>
@@ -278,7 +308,7 @@ export default function AdminDashboard({
                             type="number"
                             value={editPrice}
                             onChange={(e) => setEditPrice(Number(e.target.value))}
-                            className="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 w-24 text-white text-xs font-bold font-mono text-[#ccff00]"
+                            className="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 w-24 text-white text-xs font-bold font-mono text-[#ff3300]"
                           />
                         ) : (
                           <span className="text-white font-bold">{p.price.toLocaleString()}</span>
@@ -301,7 +331,7 @@ export default function AdminDashboard({
                           <div className="flex space-x-1.5 justify-end">
                             <button
                               onClick={() => handleSaveProductEdit(p.id)}
-                              className="bg-[#ccff00] text-[#0a0a0a] p-1 rounded hover:opacity-90"
+                              className="bg-[#ff3300] text-[#0a0a0a] p-1 rounded hover:opacity-90"
                               title="บันทึกราคา"
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -320,7 +350,7 @@ export default function AdminDashboard({
                               setEditPrice(p.price);
                               setEditStock(p.stock);
                             }}
-                            className="text-xs text-[#ccff00] font-bold hover:underline"
+                            className="text-xs text-[#ff3300] font-bold hover:underline"
                           >
                             แก้ไขด่วน
                           </button>
@@ -369,13 +399,13 @@ export default function AdminDashboard({
                 <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
                   <div className="text-right text-xs pr-2 border-r border-zinc-900">
                     <p className="text-zinc-500">นัดหมาย: <strong>{b.date} • {b.timeSlot}</strong></p>
-                    <p className="font-black text-[#ccff00] italic">{b.totalPrice.toLocaleString()} ฿</p>
+                    <p className="font-black text-[#ff3300] italic">{b.totalPrice.toLocaleString()} ฿</p>
                   </div>
 
                   {b.status === 'Pending' && (
                     <button
                       onClick={() => handleBookingPatch(b.id, 'Confirmed')}
-                      className="px-3 py-1.5 bg-[#ccff00] text-[#0a0a0a] rounded font-bold uppercase text-[10px] hover:bg-lime-400 cursor-pointer"
+                      className="px-3 py-1.5 bg-[#ff3300] text-[#0a0a0a] rounded font-bold uppercase text-[10px] hover:bg-[#ff4500] cursor-pointer"
                     >
                       อนุมัติคิว (Confirm)
                     </button>
@@ -418,7 +448,7 @@ export default function AdminDashboard({
                 className="rounded-xl border border-zinc-900 bg-zinc-950 p-4 text-xs font-mono space-y-2.5 hover:border-zinc-800"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-black text-[#ccff00]">BILL-ID: #{o.id}</span>
+                  <span className="font-black text-[#ff3300]">BILL-ID: #{o.id}</span>
                   <span className="text-zinc-500">{new Date(o.createdAt).toLocaleString()}</span>
                 </div>
 
@@ -438,13 +468,64 @@ export default function AdminDashboard({
 
                 <div className="flex justify-between items-baseline text-xs font-bold">
                   <span className="text-zinc-500">ยอดชำระสำเร็จ:</span>
-                  <span className="text-[#ccff00] font-black text-sm italic">{o.totalAmount.toLocaleString()} ฿</span>
+                  <span className="text-[#ff3300] font-black text-sm italic">{o.totalAmount.toLocaleString()} ฿</span>
                 </div>
 
               </div>
             ))}
           </div>
 
+        </div>
+      )}
+
+      {/* BLOCK 5: Reviews Moderation */}
+      {activeSegment === 'reviews' && (
+        <div className="rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-6 space-y-4">
+          <div>
+            <h3 className="font-sans font-black text-white text-sm uppercase">REVIEWS MODERATION QUEUE</h3>
+            <p className="text-[10px] text-zinc-500 font-mono">APPROVE OR REJECT PENDING PRODUCT REVIEWS FROM USERS</p>
+          </div>
+
+          <div className="space-y-3">
+            {pendingReviews.length > 0 ? pendingReviews.map((r) => (
+              <div 
+                key={r.id} 
+                className="rounded-xl border border-zinc-900 bg-zinc-950 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs font-mono hover:border-zinc-800"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="font-black text-white">{r.userName}</span>
+                    <span className="text-zinc-500">on</span>
+                    <span className="font-bold text-[#ff3300]">{r.productName}</span>
+                  </div>
+                  <div className="flex space-x-1 mb-2 text-[#ff3300]">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i}>{i < r.rating ? '★' : '☆'}</span>
+                    ))}
+                  </div>
+                  <p className="text-zinc-400 italic">"{r.comment}"</p>
+                  <span className="text-[9px] text-zinc-600 mt-2 block">{r.date}</span>
+                </div>
+
+                <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
+                  <button
+                    onClick={() => handleApproveReview(r.productId, r.id)}
+                    className="px-3 py-1.5 bg-emerald-600 text-white rounded font-bold uppercase text-[10px] hover:bg-emerald-500 cursor-pointer"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleDeleteReview(r.productId, r.id)}
+                    className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 rounded font-bold uppercase text-[10px] hover:text-white hover:bg-rose-600 hover:border-rose-500 cursor-pointer transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )) : (
+              <p className="text-xs text-zinc-500 italic text-center py-8">NO PENDING REVIEWS</p>
+            )}
+          </div>
         </div>
       )}
 

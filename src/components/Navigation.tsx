@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Package, Calendar, User, Zap } from 'lucide-react';
+import { Package, Calendar, User, Zap, Database, Navigation as NavIcon } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -9,44 +9,64 @@ interface NavigationProps {
 }
 
 export default function Navigation({ activeTab, setActiveTab, user, onLoginClick }: NavigationProps) {
+  // Production-grade menu flow
   const navItems = [
-    { id: 'wizard', label: 'Engine', icon: Zap },
-    { id: 'booking', label: 'Service', icon: Calendar },
-    { id: 'admin', label: 'Inventory', icon: Package },
-    { id: 'profile', label: 'Account', icon: User },
+    { id: 'wizard', label: 'Fitment Engine', icon: Zap, roles: ['guest', 'user', 'admin'] },
+    { id: 'booking', label: 'Service Center', icon: Calendar, roles: ['guest', 'user', 'admin'] },
+    { id: 'admin', label: 'Data Hub (Admin)', icon: Database, roles: ['admin'] },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-zinc-800">
+    <header className="sticky top-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-zinc-900">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2" onClick={() => setActiveTab('landing')}>
-          <Zap className="w-6 h-6 text-[#ccff00]" />
-          <span className="text-xl font-black italic tracking-tighter text-white">GEE</span>
+        <div 
+          className="flex items-center gap-3 cursor-pointer group" 
+          onClick={() => setActiveTab('landing')}
+        >
+          <div className="w-8 h-8 bg-[#ff3300] text-black flex items-center justify-center rounded-lg transform group-hover:-rotate-6 transition-transform">
+            <Zap className="w-5 h-5 fill-current" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-black italic tracking-tighter text-white leading-none">GGLORSING</span>
+            <span className="text-[8px] font-mono font-bold tracking-[0.3em] text-[#ff3300] uppercase">System vFINAL</span>
+          </div>
         </div>
         
-        <nav className="flex items-center gap-1">
-          {navItems.map((item) => (
+        <nav className="hidden md:flex items-center gap-2">
+          {navItems
+            .filter(item => !item.roles || item.roles.includes(user?.role || 'guest'))
+            .map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
                 activeTab === item.id 
-                  ? 'text-[#ccff00] bg-zinc-900' 
-                  : 'text-zinc-500 hover:text-zinc-300'
+                  ? 'text-black bg-[#ff3300] shadow-[0_0_15px_rgba(255,51,0,0.3)]' 
+                  : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
               }`}
             >
-              <item.icon className="w-3.5 h-3.5" />
+              <item.icon className="w-4 h-4" />
               {item.label}
             </button>
           ))}
         </nav>
 
-        <button
-          onClick={user ? () => setActiveTab('profile') : onLoginClick}
-          className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 transition-all"
-        >
-          {user ? user.name : 'Sign In'}
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={user ? () => setActiveTab('profile') : onLoginClick}
+            className={`flex items-center gap-2 px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${
+              user 
+                ? (activeTab === 'profile' ? 'border-[#ff3300] text-[#ff3300] bg-[#ff3300]/10' : 'border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-600') 
+                : 'border-[#ff3300] text-[#ff3300] hover:bg-[#ff3300] hover:text-black'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            {user ? `ID: ${user.name.split(' ')[0]}` : 'Authenticate'}
+          </button>
+          <button className="md:hidden text-zinc-400 hover:text-white">
+             <NavIcon className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </header>
   );

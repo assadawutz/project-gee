@@ -91,7 +91,7 @@ export default function BookingCalendar({
       {/* Overview Card */}
       <div className="rounded-2xl border border-zinc-800 bg-[#0a0a0a]/50 p-6 md:p-8 backdrop-blur-md">
         <h2 className="font-sans font-black tracking-tight text-2xl md:text-3xl uppercase italic text-white flex items-center space-x-2.5">
-          <CalendarClock className="w-8 h-8 text-[#ccff00]" />
+          <CalendarClock className="w-8 h-8 text-[#ff3300]" />
           <span>Gee Real-Time Booking Terminal</span>
         </h2>
         <p className="mt-2 text-sm text-zinc-400 font-medium">
@@ -112,7 +112,7 @@ export default function BookingCalendar({
           {successNote && (
             <div className="rounded-xl bg-emerald-950/40 border border-emerald-800 text-emerald-400 p-4 text-xs font-semibold animate-bounce">
               <span className="flex items-center space-x-1.5 font-bold uppercase">
-                <CheckCircle2 className="w-4 h-4 text-[#ccff00]" />
+                <CheckCircle2 className="w-4 h-4 text-[#ff3300]" />
                 <span>ลงทะเบียนเสร็จสิ้น! คิวงานแต่งล้อของพี่ได้รับการจัดแจงเรียบร้อย ตรวจได้ที่แฟ้มด้านข้าง!</span>
               </span>
             </div>
@@ -123,7 +123,7 @@ export default function BookingCalendar({
             
             <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center space-x-1">
-                <User className="w-3.5 h-3.5 text-[#ccff00]" />
+                <User className="w-3.5 h-3.5 text-[#ff3300]" />
                 <span>ชื่อผู้ติดต่อ (Customer Name):</span>
               </label>
               <input
@@ -132,13 +132,13 @@ export default function BookingCalendar({
                 placeholder="เช่น น้ารุ่ง คลองสาม"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-white focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] outline-none"
+                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-white focus:border-[#ff3300] focus:ring-1 focus:ring-[#ff3300] outline-none"
               />
             </div>
 
             <div className="flex flex-col space-y-1.5">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center space-x-1">
-                <Phone className="w-3.5 h-3.5 text-[#ccff00]" />
+                <Phone className="w-3.5 h-3.5 text-[#ff3300]" />
                 <span>เบอร์โทรศัพท์ (Mobile Phone):</span>
               </label>
               <input
@@ -147,7 +147,7 @@ export default function BookingCalendar({
                 placeholder="เช่น 089-xxx-xxxx"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-white focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] outline-none"
+                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-white focus:border-[#ff3300] focus:ring-1 focus:ring-[#ff3300] outline-none"
               />
             </div>
 
@@ -158,7 +158,7 @@ export default function BookingCalendar({
                 placeholder="เช่น Honda Civic Type R (FL5) ปี 2023"
                 value={vehicle}
                 onChange={(e) => setVehicle(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-white focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] outline-none"
+                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-bold text-white focus:border-[#ff3300] focus:ring-1 focus:ring-[#ff3300] outline-none"
               />
             </div>
 
@@ -174,7 +174,7 @@ export default function BookingCalendar({
                 required
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-mono font-bold text-white focus:border-[#ccff00] focus:ring-1 focus:ring-[#ccff00] outline-noneColor"
+                className="rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-2.5 text-xs font-mono font-bold text-white focus:border-[#ff3300] focus:ring-1 focus:ring-[#ff3300] outline-noneColor"
               />
             </div>
 
@@ -183,7 +183,7 @@ export default function BookingCalendar({
               <select
                 value={selectedSlot}
                 onChange={(e) => setSelectedSlot(e.target.value)}
-                className="rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 text-xs font-bold text-white focus:border-[#ccff00] outline-none"
+                className="rounded-lg border border-zinc-800 bg-zinc-950 p-2.5 text-xs font-bold text-white focus:border-[#ff3300] outline-none"
               >
                 {mockSlots.map((slot) => (
                   <option key={slot} value={slot}>{slot}</option>
@@ -205,7 +205,7 @@ export default function BookingCalendar({
                     onClick={() => toggleService(service.name)}
                     className={`flex items-center justify-between rounded-xl border p-3 cursor-pointer select-none transition-all duration-200 ${
                       checked 
-                        ? 'border-[#ccff00] bg-[#ccff00]/5 text-white' 
+                        ? 'border-[#ff3300] bg-[#ff3300]/5 text-white' 
                         : 'border-zinc-900 bg-zinc-950/60 text-zinc-400 hover:border-zinc-800 hover:text-zinc-200'
                     }`}
                   >
@@ -214,11 +214,11 @@ export default function BookingCalendar({
                         type="checkbox"
                         checked={checked}
                         readOnly
-                        className="rounded border-zinc-800 bg-zinc-950 text-[#ccff00] focus:ring-[#ccff00] cursor-pointer"
+                        className="rounded border-zinc-800 bg-zinc-950 text-[#ff3300] focus:ring-[#ff3300] cursor-pointer"
                       />
                       <span className="text-xs font-bold uppercase">{service.name}</span>
                     </div>
-                    <span className="text-xs font-black text-[#ccff00] font-mono">
+                    <span className="text-xs font-black text-[#ff3300] font-mono">
                       + {service.price.toLocaleString()} ฿
                     </span>
                   </div>
@@ -231,7 +231,7 @@ export default function BookingCalendar({
           <div className="pt-4 border-t border-zinc-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">ประมาณค่าแรงบริการ:</p>
-              <p className="text-xl font-black text-[#ccff00] font-sans italic tracking-tight">
+              <p className="text-xl font-black text-[#ff3300] font-sans italic tracking-tight">
                 {totalServicesPrice.toLocaleString()} ฿
               </p>
             </div>
@@ -239,7 +239,7 @@ export default function BookingCalendar({
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-3 bg-[#ccff00] text-[#0a0a0a] rounded-xl font-sans font-black text-xs uppercase tracking-wider text-center hover:bg-lime-400 disabled:opacity-50 flex items-center justify-center space-x-2 cursor-pointer"
+              className="px-6 py-3 bg-[#ff3300] text-[#0a0a0a] rounded-xl font-sans font-black text-xs uppercase tracking-wider text-center hover:bg-[#ff4500] disabled:opacity-50 flex items-center justify-center space-x-2 cursor-pointer"
             >
               {submitting ? (
                 <>
@@ -260,7 +260,7 @@ export default function BookingCalendar({
         {/* Existing Bookings overview list - Right 5 columns */}
         <div className="lg:col-span-5 rounded-2xl border border-zinc-800 bg-[#0d0d0d] p-6 space-y-4">
           <div className="border-b border-zinc-900 pb-3 flex items-center space-x-2 text-white">
-            <Users className="w-5 h-5 text-[#ccff00]" />
+            <Users className="w-5 h-5 text-[#ff3300]" />
             <h3 className="font-sans font-black text-base uppercase">ลำดับตรวจสอบคิววันนี้</h3>
           </div>
 
@@ -272,7 +272,7 @@ export default function BookingCalendar({
               return (
                 <div 
                   key={b.id}
-                  className="rounded-xl border border-zinc-900 bg-zinc-950 p-4 space-y-2.5 transition-colors hover:border-[#ccff00]/20"
+                  className="rounded-xl border border-zinc-900 bg-zinc-950 p-4 space-y-2.5 transition-colors hover:border-[#ff3300]/20"
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-extrabold text-white">{b.customerName}</span>
@@ -296,7 +296,7 @@ export default function BookingCalendar({
                     </div>
                     <div>
                       <span>ช่วงเวลา: </span>
-                      <strong className="text-[#ccff00]">{b.timeSlot}</strong>
+                      <strong className="text-[#ff3300]">{b.timeSlot}</strong>
                     </div>
                   </div>
 
@@ -310,7 +310,7 @@ export default function BookingCalendar({
 
                   <div className="flex justify-between items-baseline pt-2 text-[11px]">
                     <span className="text-zinc-500 font-bold">ค่าเหนื่อยรวม:</span>
-                    <strong className="text-[#ccff00] font-mono font-black">{b.totalPrice.toLocaleString()} ฿</strong>
+                    <strong className="text-[#ff3300] font-mono font-black">{b.totalPrice.toLocaleString()} ฿</strong>
                   </div>
 
                 </div>

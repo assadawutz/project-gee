@@ -161,21 +161,21 @@ export default function VirtualFitment({
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/20 to-black"></div>
           {/* Neon Accents */}
-          <div className="absolute top-1/4 left-0 w-full h-[1px] bg-[#ccff00]/10 blur-sm"></div>
+          <div className="absolute top-1/4 left-0 w-full h-[1px] bg-[#ff3300]/10 blur-sm"></div>
           <div className="absolute bottom-1/4 left-0 w-full h-[1px] bg-purple-500/10 blur-md"></div>
           {/* Floor */}
           <div className="absolute bottom-0 left-0 w-full h-[25%] bg-[#080808] border-t border-zinc-800/30">
-             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(204,255,0,0.05),transparent_70%)]"></div>
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(255,51,0,0.05),transparent_70%)]"></div>
           </div>
         </div>
 
         {/* HUD Elements */}
         <div className="absolute top-6 left-6 z-40 flex flex-col space-y-1">
           <h2 className="text-white font-black text-2xl uppercase tracking-tighter italic">
-            Fitment<span className="text-[#ccff00]">Engine</span> v3.0
+            Fitment<span className="text-[#ff3300]">Engine</span> v3.0
           </h2>
           <div className="flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-[#ff3300] animate-pulse"></span>
             <span className="text-[10px] text-zinc-500 font-mono uppercase font-bold tracking-widest">
               Anchored Coordinate Mapping // {selectedVehicle.brand} {selectedVehicle.model}
             </span>
@@ -262,7 +262,7 @@ export default function VirtualFitment({
               {/* Calibration Overlay */}
               {isCalibrating && (
                 <div className="absolute inset-0 z-50 pointer-events-none">
-                   <div className="absolute inset-0 border-2 border-dashed border-[#ccff00]/30 animate-pulse"></div>
+                   <div className="absolute inset-0 border-2 border-dashed border-[#ff3300]/30 animate-pulse"></div>
                 </div>
               )}
             </div>
@@ -274,7 +274,7 @@ export default function VirtualFitment({
           <div className="flex items-center space-x-6">
              <div className="flex items-center space-x-2">
                 <span className="text-zinc-500 font-mono text-[9px] uppercase font-bold tracking-widest">Ground Clearance</span>
-                <span className="text-[#ccff00] font-mono text-[10px] font-black italic">{(70 - suspensionGap).toFixed(0)}mm</span>
+                <span className="text-[#ff3300] font-mono text-[10px] font-black italic">{(70 - suspensionGap).toFixed(0)}mm</span>
              </div>
              <div className="flex items-center space-x-2">
                 <span className="text-zinc-500 font-mono text-[9px] uppercase font-bold tracking-widest">Setup</span>
@@ -283,7 +283,7 @@ export default function VirtualFitment({
           </div>
           <div className="flex items-center space-x-2">
              <div className="h-2 w-32 bg-zinc-900 rounded-full overflow-hidden">
-                <div className="h-full bg-[#ccff00]" style={{ width: '92%' }}></div>
+                <div className="h-full bg-[#ff3300]" style={{ width: '92%' }}></div>
              </div>
              <span className="text-zinc-500 font-mono text-[9px] uppercase font-bold tracking-widest">COORDS SYNCED</span>
           </div>
@@ -296,21 +296,21 @@ export default function VirtualFitment({
         <div className="grid grid-cols-3 h-16 border-b border-zinc-900">
           <button 
             onClick={() => setActiveTab('stance')}
-            className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === 'stance' ? 'bg-[#ccff00]/5 text-[#ccff00]' : 'text-zinc-500 hover:text-white'}`}
+            className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === 'stance' ? 'bg-[#ff3300]/5 text-[#ff3300]' : 'text-zinc-500 hover:text-white'}`}
           >
             <Settings className="w-4 h-4" />
             <span className="text-[9px] font-black uppercase tracking-tighter">Stance</span>
           </button>
           <button 
              onClick={() => setActiveTab('color')}
-             className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === 'color' ? 'bg-[#ccff00]/5 text-[#ccff00]' : 'text-zinc-500 hover:text-white'}`}
+             className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === 'color' ? 'bg-[#ff3300]/5 text-[#ff3300]' : 'text-zinc-500 hover:text-white'}`}
           >
             <Disc className="w-4 h-4" />
             <span className="text-[9px] font-black uppercase tracking-tighter">Paint</span>
           </button>
           <button 
              onClick={() => setActiveTab('photo')}
-             className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === 'photo' ? 'bg-[#ccff00]/5 text-[#ccff00]' : 'text-zinc-500 hover:text-white'}`}
+             className={`flex flex-col items-center justify-center space-y-1 transition-all ${activeTab === 'photo' ? 'bg-[#ff3300]/5 text-[#ff3300]' : 'text-zinc-500 hover:text-white'}`}
           >
             <Camera className="w-4 h-4" />
             <span className="text-[9px] font-black uppercase tracking-tighter">Export</span>
@@ -322,7 +322,7 @@ export default function VirtualFitment({
           <section className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-5 space-y-5">
              <div className="flex items-start justify-between">
                 <div>
-                   <span className="text-[10px] font-black text-[#ccff00] uppercase tracking-widest block mb-1">Active Setup</span>
+                   <span className="text-[10px] font-black text-[#ff3300] uppercase tracking-widest block mb-1">Active Setup</span>
                    <h3 className="text-white text-lg font-black leading-tight uppercase italic">{selectedWheel.brand} {selectedWheel.name}</h3>
                    <p className="text-[11px] text-zinc-500 font-medium mt-1">{selectedWheel.description}</p>
                 </div>
@@ -370,7 +370,7 @@ export default function VirtualFitment({
                       <input 
                         type="range" min="0" max="70" value={suspensionGap}
                         onChange={(e) => setSuspensionGap(Number(e.target.value))}
-                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ccff00]"
+                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ff3300]"
                       />
                    </div>
 
@@ -382,7 +382,7 @@ export default function VirtualFitment({
                       <input 
                         type="range" min="-12" max="5" step="0.5" value={camberAngle}
                         onChange={(e) => setCamberAngle(Number(e.target.value))}
-                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ccff00]"
+                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ff3300]"
                       />
                    </div>
                 </div>
@@ -408,7 +408,7 @@ export default function VirtualFitment({
                       <input 
                         type="range" min="25" max="60" step="5" value={sidewallHeight}
                         onChange={(e) => setSidewallHeight(Number(e.target.value))}
-                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ccff00]"
+                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ff3300]"
                       />
                    </div>
 
@@ -420,7 +420,7 @@ export default function VirtualFitment({
                       <input 
                         type="range" min="0" max="20" value={tireStretch}
                         onChange={(e) => setTireStretch(Number(e.target.value))}
-                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ccff00]"
+                        className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ff3300]"
                       />
                    </div>
                 </div>
@@ -441,7 +441,7 @@ export default function VirtualFitment({
                    <input 
                     type="range" min="80" max="130" value={wheelSizeScale}
                     onChange={(e) => setWheelSizeScale(Number(e.target.value))}
-                    className="flex-1 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ccff00]"
+                    className="flex-1 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#ff3300]"
                   />
                   <button 
                     onClick={() => setWheelSizeScale(100)}
@@ -456,7 +456,7 @@ export default function VirtualFitment({
               <div className="pt-4 border-t border-zinc-900/50">
                  <button 
                    onClick={() => setIsCalibrating(!isCalibrating)}
-                   className={`w-full py-4 rounded-2xl border-2 transition-all flex items-center justify-center space-x-3 ${isCalibrating ? 'bg-[#ccff00] border-[#ccff00] text-black shadow-[0_0_30px_rgba(204,255,0,0.3)]' : 'bg-transparent border-zinc-800 text-zinc-400 hover:border-zinc-600'}`}
+                   className={`w-full py-4 rounded-2xl border-2 transition-all flex items-center justify-center space-x-3 ${isCalibrating ? 'bg-[#ff3300] border-[#ff3300] text-black shadow-[0_0_30px_rgba(255,51,0,0.3)]' : 'bg-transparent border-zinc-800 text-zinc-400 hover:border-zinc-600'}`}
                  >
                     <MousePointer2 className="w-4 h-4" />
                     <span className="text-[11px] font-black uppercase tracking-widest">{isCalibrating ? 'Finish Calibration' : 'Fine-Tune Alignment'}</span>
@@ -478,11 +478,11 @@ export default function VirtualFitment({
                 </div>
 
                 <div className="grid grid-cols-4 gap-3">
-                   {['#ffffff', '#1a1a1a', '#4a4a4a', '#8b0000', '#00008b', '#006400', '#ff8c00', '#ccff00'].map(color => (
+                   {['#ffffff', '#1a1a1a', '#4a4a4a', '#8b0000', '#00008b', '#006400', '#ff8c00', '#ff3300'].map(color => (
                      <button
                         key={color}
                         onClick={() => setCarColor(color)}
-                        className={`aspect-square rounded-2xl border-4 transition-all ${carColor === color ? 'border-[#ccff00] scale-110 shadow-lg' : 'border-zinc-900 hover:border-zinc-700'}`}
+                        className={`aspect-square rounded-2xl border-4 transition-all ${carColor === color ? 'border-[#ff3300] scale-110 shadow-lg' : 'border-zinc-900 hover:border-zinc-700'}`}
                         style={{ backgroundColor: color }}
                      />
                    ))}
@@ -508,8 +508,8 @@ export default function VirtualFitment({
           {activeTab === 'photo' && (
              <div className="space-y-6">
                 <div className="p-8 bg-zinc-900/30 rounded-3xl border border-zinc-800/50 flex flex-col items-center text-center space-y-4">
-                   <div className="h-16 w-16 bg-[#ccff00]/10 rounded-full flex items-center justify-center">
-                      <Camera className="w-8 h-8 text-[#ccff00]" />
+                   <div className="h-16 w-16 bg-[#ff3300]/10 rounded-full flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-[#ff3300]" />
                    </div>
                    <div className="space-y-1">
                       <h4 className="text-white text-lg font-black uppercase tracking-tight">Render Scene</h4>
@@ -517,7 +517,7 @@ export default function VirtualFitment({
                    </div>
                    <button 
                      onClick={handleCapture}
-                     className="w-full py-4 bg-[#ccff00] text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-lime-400 transition-all flex items-center justify-center space-x-2"
+                     className="w-full py-4 bg-[#ff3300] text-black rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#ff4500] transition-all flex items-center justify-center space-x-2"
                    >
                      <Download className="w-4 h-4" />
                      <span>Save to Media</span>
@@ -545,7 +545,7 @@ export default function VirtualFitment({
                  <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest block">Estimated Total</span>
                  <div className="flex items-baseline space-x-1">
                     <span className="text-3xl font-black italic text-white tracking-tighter">{(selectedWheel.price * 4 + selectedTire.price * 4 + 2500).toLocaleString()}</span>
-                    <span className="text-sm font-bold text-[#ccff00] uppercase">฿</span>
+                    <span className="text-sm font-bold text-[#ff3300] uppercase">฿</span>
                  </div>
               </div>
               <div className="text-right">
@@ -553,7 +553,7 @@ export default function VirtualFitment({
                  <span className="text-[11px] text-zinc-400 font-bold uppercase">+ Wheel Alignment</span>
               </div>
            </div>
-           <button className="w-full py-4 bg-[#ccff00] text-black hover:bg-lime-400 rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center space-x-3 shadow-[0_0_20px_rgba(204,255,0,0.2)]">
+           <button className="w-full py-4 bg-[#ff3300] text-black hover:bg-[#ff4500] rounded-2xl font-black uppercase tracking-widest text-xs transition-all flex items-center justify-center space-x-3 shadow-[0_0_20px_rgba(255,51,0,0.2)]">
               <span>Checkout Configuration</span>
               <ArrowRight className="w-4 h-4" />
            </button>
